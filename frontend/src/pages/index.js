@@ -2,32 +2,33 @@ import { useState } from "react";
 import axios from "axios";
 
 export default function Home() {
-  const [response, setResponse] = useState("");
+  const [text, setText] = useState("");
+  const [summary, setSummary] = useState("");
 
-  const fetchMessage = async () => {
+  const handleSummarize = async () => {
     try {
-      const res = await axios.get("http://localhost:8000/"); // แก้ไข URL เป็น localhost
-      setResponse(res.data.message); // บันทึกข้อความที่ได้จาก Backend
-    } catch (err) {
-      console.error("Error fetching data:", err);
-      setResponse("Failed to fetch data from Backend");
+      const response = await axios.post("http://localhost:8000/api/summarize", { text });
+      setSummary(response.data.summary);
+    } catch (error) {
+      console.error("Error fetching summary:", error);
+      setSummary("เกิดข้อผิดพลาดในการสรุปข้อความ");
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-100">
-      <h1 className="text-2xl font-bold mb-4">Frontend-Backend Connection</h1>
-      <button
-        onClick={fetchMessage}
-        className="px-4 py-2 bg-blue-500 text-white rounded"
-      >
-        Fetch Message
-      </button>
-      {response && (
-        <div className="mt-4 p-4 bg-white shadow rounded">
-          <p>{response}</p>
-        </div>
-      )}
+    <div style={{ padding: "20px" }}>
+      <h1>Thai2T5 Summarization</h1>
+      <textarea 
+        rows="5"
+        cols="50"
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder="ใส่ข้อความที่ต้องการสรุป..."
+      />
+      <br />
+      <button onClick={handleSummarize}>สรุปข้อความ</button>
+      <h2>ผลลัพธ์:</h2>
+      <p>{summary}</p>
     </div>
   );
 }
