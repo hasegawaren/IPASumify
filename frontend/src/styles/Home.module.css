@@ -59,3 +59,35 @@
     color: #60a5fa;
     transform: scale(1.05);
 }
+
+.hero {
+    text-align: center;
+    padding: 100px 20px;
+    background-color: #e5e7eb;
+}
+
+.hero h1 {
+    font-size: 36px;
+    font-weight: bold;
+}
+
+.hero p {
+    color: #555;
+    margin-top: 10px;
+}
+
+.button {
+    margin-top: 20px;
+    padding: 12px 20px;
+    background-color: #2563eb;
+    color: white;
+    font-size: 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.button:hover {
+    background-color: #1e40af;
+    transform: scale(1.05);
+}

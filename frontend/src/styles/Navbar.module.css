@@ -1,35 +1,66 @@
 .navbar {
-    background-color: #1f2937;
-    color: white;
-    padding: 20px 40px; /* เพิ่ม Padding ด้านซ้ายและขวา */
+    background: transparent;
+    padding: 16px 40px;
     width: 100%;
-    position: fixed;
-    top: 0;
-    left: 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
-    margin: 0 auto; /* จัดให้อยู่ตรงกลาง */
-}
-
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+  }
   
+  /* โลโก้ */
   .logo {
-    font-size: 20px;
+    font-size: 22px;
     font-weight: bold;
   }
   
-  .languageSwitch {
-    background: none;
-    color: white;
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
+  /* เมนูหลัก */
+  .menu {
+    display: flex;
+    gap: 20px;
+    align-items: center;
   }
   
-  .languageSwitch:hover {
-    color: #60a5fa; /* สีฟ้า */
-    transform: scale(1.05);
-    transition: all 0.2s ease-in-out;
- }
- 
+  .menuItem {
+    color: #333;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 10px 20px;
+    border-radius: 999px;
+    transition: all 0.3s ease-in-out;
+  }
+  
+  /* เมนูที่ถูกเลือก (Active) */
+  .menuItem.active {
+    background: #ff5555;
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 4px 10px rgba(255, 85, 85, 0.4);
+  }
+  
+  /* Hover Effect */
+  .menuItem:hover {
+    color: #ff5555;
+  }
+  
+  /* ปุ่ม Try Now */
+  .tryNow {
+    background: black;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s ease-in-out;
+  }
+  
+  .tryNow:hover {
+    background: #333;
+  }
+  
