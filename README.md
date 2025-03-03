@@ -6,7 +6,7 @@
    .\.venv\Scripts\activate        # สำหรับ Windows
    .\.venv\Scripts\Activate.ps1    # สำหรับ PowerShell
    pip install -r requirements.txt # ติดตั้ง Dependencies
-   uvicorn main:app --reload       # รันเซิร์ฟเวอร์
+   uvicorn app.main:app --reload   # รันเซิร์ฟเวอร์
    ```
 
 ตั้งค่า Frontend (Next.js):

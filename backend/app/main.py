@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 from fastapi.middleware.cors import CORSMiddleware
 import re
+from app.services.wiki_scraper import get_wikipedia_summary
 
 # โหลดโมเดลที่เลือกใช้
 model_name = "drive087/wikinews_mt5-thai-sentence-sum"
@@ -64,3 +65,16 @@ def summarize_text_api(input_data: TextInput):
     summary_clean = re.sub(r"<extra_id_\d+>", "", summary).strip()
 
     return {"summary": summary_clean}
+
+@app.get("/wiki/")
+def get_wiki_data(topic: str, lang: str = "en"):
+    """ API ดึงข้อมูล Wikipedia """
+    try:
+        result = get_wikipedia_summary(topic, lang)
+        
+        if "error" in result:
+            raise HTTPException(status_code=404, detail=result["error"])
+        
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"เกิดข้อผิดพลาด: {str(e)}")
