@@ -2,10 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+
 body {
-    font-family: "Inter", sans-serif;
-    background-color: #e5e7eb;
-    margin: 0;
-    padding: 0;
-  }
-  
+  font-family: "Inter", sans-serif;
+  background: linear-gradient(to bottom right, #dddddd, #c8e0f8); /* ไล่สีจากครีม -> น้ำเงินอ่อน */
+  background-attachment: fixed; /* ป้องกันการเลื่อนแล้วสีเปลี่ยน */
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+}

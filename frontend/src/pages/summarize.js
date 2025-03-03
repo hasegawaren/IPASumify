@@ -6,7 +6,7 @@ import { Textarea } from "@/components/Textarea";
 import Navbar from "@/components/Navbar";
 import styles from "@/styles/Home.module.css";
 
-export default function summarize() {
+export default function Home() {
   const [text, setText] = useState("");
   const [file, setFile] = useState(null);
   const [fileName, setFileName] = useState("");
