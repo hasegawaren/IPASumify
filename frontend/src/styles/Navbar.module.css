@@ -1,0 +1,35 @@
+.navbar {
+    background-color: #1f2937;
+    color: white;
+    padding: 20px 40px; /* เพิ่ม Padding ด้านซ้ายและขวา */
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+    margin: 0 auto; /* จัดให้อยู่ตรงกลาง */
+}
+
+  
+  .logo {
+    font-size: 20px;
+    font-weight: bold;
+  }
+  
+  .languageSwitch {
+    background: none;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  .languageSwitch:hover {
+    color: #60a5fa; /* สีฟ้า */
+    transform: scale(1.05);
+    transition: all 0.2s ease-in-out;
+ }
+ 
