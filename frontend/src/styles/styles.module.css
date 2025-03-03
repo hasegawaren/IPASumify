@@ -1,0 +1,20 @@
+/* styles.css */
+
+/* Gradient Background Animation */
+@keyframes gradientAnimation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.min-h-screen {
+  background: linear-gradient(45deg, #6EE7B7, #3B82F6, #9333EA);
+  background-size: 600% 600%;
+  animation: gradientAnimation 10s ease infinite;
+}

@@ -4,7 +4,8 @@
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    background-color: #e5e7eb;
+    background: linear-gradient(to bottom right, #dddddd, #f4d5a1); /* ไล่สีจากครีม -> น้ำเงินอ่อน */
+    background-attachment: fixed; /* ป้องกันการเลื่อนแล้วสีเปลี่ยน */
 }
 
 .card {
