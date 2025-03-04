@@ -42,7 +42,7 @@
     height: 60px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.1);
-    border: 2px solid #000; /* กรอบสีดำ */
+    border: 2px solid #898989; /* กรอบสีดำ */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -51,7 +51,7 @@
   }
   
   .menuItem.inactive:hover {
-    border-color: rgba(255, 255, 255, 0.5);
+    border-color: rgba(0, 0, 0, 0.5);
     transform: scale(1.1);
   }
   
@@ -60,7 +60,7 @@
     position: absolute;
     bottom: -20px; /* ปรับตำแหน่งของตัวอักษรให้ด้านล่าง */
     font-size: 12px;
-    color: #fff;
+    color: #000000;
     opacity: 0; /* เริ่มต้นให้ซ่อน */
     transition: opacity 0.4s ease-in-out;
   }
@@ -117,6 +117,10 @@
   transform: translateY(0);
   transition-delay: 0.3s;
 }
+
+.menuItem.active:hover {
+    transform: scale(1.07);
+  }
   
   /* เมนูที่ถูกเลือก */
   .menuItem.activeStore {
@@ -223,3 +227,43 @@
     transform: scale(1.1);
   }
   
+  @media (max-width: 1024px) {
+    .navbar {
+        padding: 10px 30px;
+    }
+
+    .logo {
+        width: 160px;
+    }
+
+    .menu {
+        gap: 10px;
+    }
+
+    .menuItem.inactive {
+        width: 50px;
+        height: 50px;
+    }
+
+    .menuItem.inactive span {
+        font-size: 10px;
+    }
+}
+
+/* Responsive สำหรับหน้าจอขนาดเล็ก (เช่น Mobile) */
+@media (max-width: 768px) {
+
+    .logo {
+        width: 120px;
+    }
+
+    .menuItem.inactive {
+        width: 60px;
+        height: 60px;
+    }
+
+    .menuItem.inactive span {
+        font-size: 14px;
+    }
+
+}

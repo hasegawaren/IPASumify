@@ -1,20 +1,23 @@
-/* styles.css */
 
-/* Gradient Background Animation */
-@keyframes gradientAnimation {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+.container {
+  min-height: 80vh;
+  background-image: url('/images/6.png'); /* เปลี่ยนเส้นทางเป็นภาพที่คุณต้องการ */
+  background-size: cover; /* ทำให้ภาพครอบคลุมพื้นที่ */
+  background-position: center; /* จัดตำแหน่งภาพให้อยู่ตรงกลาง */
+  background-repeat: no-repeat; /* ห้ามทำการซ้ำของภาพ */
+  display: flex;
+  flex-direction: column;
 }
 
-.min-h-screen {
-  background: linear-gradient(45deg, #6EE7B7, #3B82F6, #9333EA);
-  background-size: 600% 600%;
-  animation: gradientAnimation 10s ease infinite;
+  
+.formContainer {
+  width: 100%;
+  max-width: 1100px;
+  background-size: cover;
+  background-position: center;
+  border-radius: 1.5rem;
+  padding: 2rem;
+  backdrop-filter: blur(15px); /* ทำให้พื้นหลังเบลอ */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); /* เงาโปร่งใส */
+  transition: all 0.3s ease;
 }

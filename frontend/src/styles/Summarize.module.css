@@ -1,0 +1,182 @@
+
+.container {
+    min-height: 110vh;
+    background-image: url('/images/6.png'); /* เปลี่ยนเส้นทางเป็นภาพที่คุณต้องการ */
+    background-size: cover; /* ทำให้ภาพครอบคลุมพื้นที่ */
+    background-position: center; /* จัดตำแหน่งภาพให้อยู่ตรงกลาง */
+    background-repeat: no-repeat; /* ห้ามทำการซ้ำของภาพ */
+    display: flex;
+    flex-direction: column;
+    padding-top: 30px;
+  }
+  
+  
+  /* ส่วน Navbar */
+  .navbar {
+    position: fixed;
+    top: 20px;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+  }
+  
+  /* ส่วนของเนื้อหาหลัก */
+  .mainContent {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+  }
+  
+  .formContainer {
+    width: 100%;
+    max-width: 1100px;
+
+    background-size: cover;
+    background-position: center;
+    border-radius: 1.5rem;
+    padding: 2rem;
+    backdrop-filter: blur(15px); /* ทำให้พื้นหลังเบลอ */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); /* เงาโปร่งใส */
+    transition: all 0.3s ease;
+  }
+  
+  /* หัวเรื่อง */
+  .title {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: #333;
+    text-align: center;
+    margin-bottom: 0.5rem;
+  }
+  
+  .subtitle {
+    text-align: center;
+    color: #6b7280;
+    margin-bottom: 1.5rem;
+  }
+  
+/* ปรับให้ปุ่ม Tab ดูชัดเจนและมีลูกเล่น */
+.tabButton {
+    padding: 0.75rem 1.5rem;
+    border-radius: 1.5rem;
+    font-weight: 600;
+    font-size: 1rem;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(255, 255, 255, 0.2); /* พื้นหลังโปร่งใส */
+    color: rgb(0, 0, 0);
+    border: 2px solid rgba(0, 0, 0, 0.5); /* ขอบโปร่งใส */
+    transition: all 0.3s ease;
+  }
+  
+  /* ปุ่มที่กำลังเลือก */
+  .tabButton.active {
+    background-color: #60a5fa; /* สีฟ้าเมื่อเลือก */
+    border: 2px solid #2563eb;
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.5); /* เพิ่มเงาเมื่อเลือก */
+  }
+  
+  /* ปุ่มเมื่อ hover */
+  .tabButton:hover {
+    background-color: rgba(0, 112, 255, 0.1); /* ฟ้าโปร่งใส */
+    color: #1e40af;
+    border: 2px solid #1e40af;
+    transform: scale(1.05);
+  }
+  
+  /* ขนาดไอคอน */
+  .tabButton .tabIcon {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    transition: transform 0.3s ease;
+  }
+  
+  /* ขยายขนาดไอคอนเมื่อ hover */
+  .tabButton:hover .tabIcon {
+    transform: scale(1.2);
+  }
+  
+  /* ฟอร์มอินพุต */
+  .textareaInput,
+.textInput,
+.fileInput {
+  width: 100%;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.3); /* พื้นหลังโปร่งใส */
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.5); /* ขอบเบาๆ */
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+/* เปลี่ยนสีเมื่อ focus */
+.textareaInput:focus,
+.textInput:focus {
+  background-color: rgba(255, 255, 255, 0.5); /* เพิ่มความโปร่งใสเมื่อ focus */
+  border-color: #3b82f6; /* สีฟ้าสำหรับ focus */
+}
+
+  .textareaInput {
+    resize: vertical;
+    min-height: 150px;
+  }
+  
+  .fileInput {
+    padding: 0.75rem;
+  }
+  
+  .fileInput:hover {
+    background-color: #3b82f6;
+    color: white;
+  }
+  
+  /* ผลสรุป */
+  .summaryOutput {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background-color: #f3f4f6;
+    border-radius: 0.75rem;
+    border: 1px solid #e5e7eb;
+  }
+  
+  .summaryOutput h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 1rem;
+  }
+  
+  .summaryOutput p {
+    color: #6b7280;
+    white-space: pre-wrap;
+  }
+  
+  /* ปุ่มสรุป */
+  .summarizeButton {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    color: white;
+    background-color: #3b82f6;
+    transition: all 0.3s ease;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .summarizeButton:disabled {
+    background-color: #60a5fa;
+    cursor: not-allowed;
+  }
+  
+  .summarizeButton:hover {
+    background-color: #2563eb;
+  }
+  

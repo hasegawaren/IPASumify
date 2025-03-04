@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import Navbar from "@/components/Navbar";
+import styles from "@/styles/Summarize.module.css";
 
 export default function Summarize() {
   const [activeTab, setActiveTab] = useState("text");
@@ -56,44 +57,31 @@ export default function Summarize() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
+    <div className={styles.container}>
       <Navbar />
-      <div className="flex-grow flex items-center justify-center p-4">
-        <div className="w-full max-w-4xl bg-white rounded-xl shadow-lg p-8">
-          <h1 className="text-4xl font-bold text-center text-gray-800 mb-2">Sumify</h1>
-          <p className="text-center text-gray-600 mb-6">เครื่องมือสรุปเนื้อหาด้วย AI</p>
-
+      <div className={styles.mainContent}>
+        <div className={styles.formContainer}>
           {/* Tab Bar */}
           <div className="flex justify-center gap-4 mb-6">
             <button
-              className={`px-6 py-2 rounded-lg font-medium transition-all ${
-                activeTab === "text"
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
+              className={`${styles.tabButton} ${activeTab === "text" ? "active" : ""}`}
               onClick={() => setActiveTab("text")}
             >
-              ใส่ข้อความ
+              Text Summary
             </button>
             <button
-              className={`px-6 py-2 rounded-lg font-medium transition-all ${
-                activeTab === "pdf"
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
+              className={`${styles.tabButton} ${activeTab === "pdf" ? "active" : ""}`}
               onClick={() => setActiveTab("pdf")}
             >
-              อัปโหลด PDF
+
+              PDF Summary
             </button>
             <button
-              className={`px-6 py-2 rounded-lg font-medium transition-all ${
-                activeTab === "wiki"
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
+              className={`${styles.tabButton} ${activeTab === "wiki" ? "active" : ""}`}
               onClick={() => setActiveTab("wiki")}
             >
-              ลิงก์ Wikipedia
+
+            Wikipedia Link
             </button>
           </div>
 
@@ -102,10 +90,10 @@ export default function Summarize() {
             {activeTab === "text" && (
               <textarea
                 rows="6"
-                placeholder="พิมพ์ข้อความที่ต้องการสรุป..."
+                placeholder="Enter the text you want to summarize..."
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={styles.textareaInput}
               />
             )}
 
@@ -115,16 +103,16 @@ export default function Summarize() {
                   type="file"
                   accept=".pdf"
                   onChange={handleFileChange}
-                  className="w-full p-2 border border-gray-300 rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white hover:file:bg-blue-700"
+                  className={styles.fileInput}
                 />
                 {fileName && (
                   <div className="mt-2 text-sm text-gray-600">
-                    ไฟล์ที่เลือก: {fileName}{" "}
+                    Selected files: {fileName}{" "}
                     <button
                       onClick={clearFile}
                       className="text-red-500 hover:underline ml-2"
                     >
-                      ลบ
+                      Delete
                     </button>
                   </div>
                 )}
@@ -134,10 +122,10 @@ export default function Summarize() {
             {activeTab === "wiki" && (
               <input
                 type="text"
-                placeholder="วางลิงก์ Wikipedia (เช่น https://en.wikipedia.org/wiki/...)"
+                placeholder="Paste a Wikipedia link (e.g. https://en.wikipedia.org/wiki/...)"
                 value={wikiLink}
                 onChange={(e) => setWikiLink(e.target.value)}
-                className="w-full p-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={styles.textInput}
               />
             )}
           </div>
@@ -146,9 +134,7 @@ export default function Summarize() {
           <button
             onClick={handleSummarize}
             disabled={loading}
-            className={`w-full py-3 rounded-lg font-semibold text-white ${
-              loading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
-            } transition-all flex items-center justify-center`}
+            className={styles.summarizeButton}
           >
             {loading ? (
               <>
@@ -172,20 +158,18 @@ export default function Summarize() {
                     d="M4 12a8 8 0 018-8v8h8a8 8 0 11-16 0z"
                   />
                 </svg>
-                กำลังสรุป...
+                Summarizing...
               </>
             ) : (
-              "สรุป"
+              "Summarize"
             )}
           </button>
 
           {/* Summary Output */}
-          
-            <div className="mt-6 p-6 bg-gray-50 rounded-lg border border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-800 mb-2">ผลสรุป:</h2>
-              <p className="text-gray-700 whitespace-pre-wrap">{summary}</p>
-            </div>
-          
+          <div className={styles.summaryOutput}>
+            <h2>Conclusion:</h2>
+            <p>{summary}</p>
+          </div>
         </div>
       </div>
     </div>
