@@ -1,175 +1,204 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import Navbar from "@/components/Navbar";
+import { FaPaperclip, FaLink, FaTimes } from "react-icons/fa"; // Icons for file and link
+import { Worker, Viewer } from '@react-pdf-viewer/core'; // Import pdf viewer
+import '@react-pdf-viewer/core/lib/styles/index.css'; // Required CSS for pdf viewer
+import { pdfjs } from "react-pdf";
 import styles from "@/styles/Summarize.module.css";
 
 export default function Summarize() {
-  const [activeTab, setActiveTab] = useState("text");
-  const [text, setText] = useState("");
   const [file, setFile] = useState(null);
-  const [fileName, setFileName] = useState("");
-  const [wikiLink, setWikiLink] = useState("");
+  const [numPages, setNumPages] = useState(null);
   const [summary, setSummary] = useState("");
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatInput, setChatInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [pdfError, setPdfError] = useState(false);
+  const [showLinkInput, setShowLinkInput] = useState(false);
+  const [wikiLink, setWikiLink] = useState("");
+  const chatContainerRef = useRef(null);
+  const [isPdfOpen, setIsPdfOpen] = useState(false); // Track if PDF is open
 
-  // Handle file selection
+  useEffect(() => {
+    // Simulating loading a PDF file and its summary
+    setChatMessages([
+      { sender: "AI", text: "This document is a report about the climate change in Thailand in 2024..." },
+      { sender: "User", text: "Which region is most affected?" },
+      { sender: "AI", text: "The northern region is the most affected..." },
+    ]);
+  }, []);
+
+  useEffect(() => {
+    // Scroll to the latest message when a new message is added
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [chatMessages]);
+
+  // Handle PDF file load success
+  const onDocumentLoadSuccess = ({ numPages }) => {
+    setNumPages(numPages);
+    setPdfError(false); // Reset error when the document is loaded successfully
+  };
+
+  const closePdfViewer = () => {
+    setFile(null);
+    setIsPdfOpen(false); // Close PDF and reset state
+  };
+
   const handleFileChange = (event) => {
     const uploadedFile = event.target.files[0];
-    if (uploadedFile) {
+    if (uploadedFile && uploadedFile.type === "application/pdf") {
       setFile(uploadedFile);
-      setFileName(uploadedFile.name);
+      setIsPdfOpen(true); // Set PDF as open
+      setPdfError(false);
+    } else {
+      setFile(null);
+      setPdfError(true);
     }
   };
 
-  // Clear uploaded file
-  const clearFile = () => {
-    setFile(null);
-    setFileName("");
-  };
+  // Handle chat submit
+  const handleChatSubmit = async (e) => {
+    e.preventDefault();
+    if (!chatInput.trim()) return;
 
-  // Summarization request
-  const handleSummarize = async () => {
-    if (!text && !file && !wikiLink) {
-      alert("กรุณาใส่ข้อมูลสำหรับการสรุป");
-      return;
-    }
+    const userMessage = { sender: "User", text: chatInput };
+    setChatMessages((prev) => [...prev, userMessage]);
+    setChatInput("");
 
-    setLoading(true);
     try {
-      let response;
-      if (activeTab === "text" && text) {
-        response = await axios.post("http://localhost:8000/api/summarize", { text });
-      } else if (activeTab === "pdf" && file) {
-        const formData = new FormData();
-        formData.append("file", file);
-        response = await axios.post("http://localhost:8000/api/summarize-pdf", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-      } else if (activeTab === "wiki" && wikiLink) {
-        response = await axios.post("http://localhost:8000/api/summarize-wiki", { url: wikiLink });
-      }
-      setSummary(response?.data?.summary || "ไม่พบข้อมูลสรุป");
+      const response = await axios.post("http://localhost:8000/api/chat", {
+        message: chatInput,
+        context: summary,
+      });
+      setChatMessages((prev) => [
+        ...prev,
+        { sender: "AI", text: response?.data?.reply || "Unable to respond." },
+      ]);
     } catch (error) {
-      console.error("Error fetching summary:", error);
-      setSummary("เกิดข้อผิดพลาดในการสรุปข้อความ");
+      setChatMessages((prev) => [
+        ...prev,
+        { sender: "AI", text: "An error occurred while answering." },
+      ]);
     }
-    setLoading(false);
+  };
+
+  // Handle link submission
+  const handleLinkSubmit = (e) => {
+    e.preventDefault();
+    if (!wikiLink.trim()) return;
+
+    const userMessage = { sender: "User", text: wikiLink };
+    setChatMessages((prev) => [...prev, userMessage]);
+    setWikiLink("");
+    setShowLinkInput(false);  // Hide the link input after submission
   };
 
   return (
     <div className={styles.container}>
       <Navbar />
-      <div className={styles.mainContent}>
-        <div className={styles.formContainer}>
-          {/* Tab Bar */}
-          <div className="flex justify-center gap-4 mb-6">
-            <button
-              className={`${styles.tabButton} ${activeTab === "text" ? "active" : ""}`}
-              onClick={() => setActiveTab("text")}
-            >
-              Text Summary
-            </button>
-            <button
-              className={`${styles.tabButton} ${activeTab === "pdf" ? "active" : ""}`}
-              onClick={() => setActiveTab("pdf")}
-            >
+      <div className={styles.content}>
+        <div className={isPdfOpen ? styles.splitLayout : styles.centerLayout}>
+          {/* Sumify Chat Card */}
+          <div className={styles.chatContainer}>
+            <div className={styles.chatHeader}>
+              <h2>Sumify Chat</h2>
+            </div>
 
-              PDF Summary
-            </button>
-            <button
-              className={`${styles.tabButton} ${activeTab === "wiki" ? "active" : ""}`}
-              onClick={() => setActiveTab("wiki")}
-            >
-
-            Wikipedia Link
-            </button>
-          </div>
-
-          {/* Input Area */}
-          <div className="mb-6">
-            {activeTab === "text" && (
-              <textarea
-                rows="6"
-                placeholder="Enter the text you want to summarize..."
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                className={styles.textareaInput}
-              />
-            )}
-
-            {activeTab === "pdf" && (
-              <div>
-                <input
-                  type="file"
-                  accept=".pdf"
-                  onChange={handleFileChange}
-                  className={styles.fileInput}
-                />
-                {fileName && (
-                  <div className="mt-2 text-sm text-gray-600">
-                    Selected files: {fileName}{" "}
-                    <button
-                      onClick={clearFile}
-                      className="text-red-500 hover:underline ml-2"
-                    >
-                      Delete
-                    </button>
+            <div ref={chatContainerRef} className={styles.chatArea}>
+              {loading ? (
+                <div className={styles.loadingText}>
+                  <p className="text-gray-500">Summarizing...</p>
+                </div>
+              ) : (
+                chatMessages.map((msg, index) => (
+                  <div key={index} className={`${styles.message} ${msg.sender === "User" ? styles.messageUser : styles.messageAI}`}>
+                    <div className={`${styles.messageBox} ${msg.sender === "User" ? styles.messageUserBox : styles.messageAIBox}`}>
+                      <p>{msg.text}</p>
+                    </div>
                   </div>
-                )}
+                ))
+              )}
+            </div>
+
+            {/* Input Form */}
+            <form onSubmit={handleChatSubmit} className={styles.chatInputForm}>
+              <div className="flex items-center gap-2">
+                <FaPaperclip
+                  size={30}
+                  className="cursor-pointer"
+                  style={{ color: '#4A90E2' }} 
+                  onClick={() => document.getElementById('fileInput').click()}
+                />
+                <FaLink
+                  size={30}
+                  className="cursor-pointer"
+                  style={{ color: '#FF6347' }}  
+                  onClick={() => setShowLinkInput(true)}
+                />
+                <input
+                  type="text"
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  placeholder="Ask a question about the summary..."
+                  className={styles.chatInput}
+                />
+              </div>
+              <button type="submit" className={styles.submitButton}>
+                Send
+              </button>
+            </form>
+
+            {/* File input for PDF */}
+            <input
+              type="file"
+              id="fileInput"
+              accept="application/pdf"
+              onChange={handleFileChange}
+              className={styles.fileInput}
+              style={{ display: "none" }}
+            />
+            {pdfError && <p className="text-red-500 text-center">Please upload a valid PDF file.</p>}
+
+            {/* Link input modal */}
+            {showLinkInput && (
+              <div className={styles.linkModal}>
+                <div className={styles.linkModalContent}>
+                  <h3>Enter the Wikipedia Link:</h3>
+                  <input
+                    type="text"
+                    value={wikiLink}
+                    onChange={(e) => setWikiLink(e.target.value)}
+                    placeholder="Enter URL"
+                    className={styles.chatInput}
+                  />
+                  <div>
+                    <button onClick={handleLinkSubmit} className={styles.submitButton}>Submit Link</button>
+                    <button onClick={() => setShowLinkInput(false)} className={styles.cancelButton}>Cancel</button>
+                  </div>
+                </div>
               </div>
             )}
-
-            {activeTab === "wiki" && (
-              <input
-                type="text"
-                placeholder="Paste a Wikipedia link (e.g. https://en.wikipedia.org/wiki/...)"
-                value={wikiLink}
-                onChange={(e) => setWikiLink(e.target.value)}
-                className={styles.textInput}
-              />
-            )}
           </div>
 
-          {/* Summarize Button */}
-          <button
-            onClick={handleSummarize}
-            disabled={loading}
-            className={styles.summarizeButton}
-          >
-            {loading ? (
-              <>
-                <svg
-                  className="animate-spin mr-2 h-5 w-5 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8v8h8a8 8 0 11-16 0z"
-                  />
-                </svg>
-                Summarizing...
-              </>
-            ) : (
-              "Summarize"
-            )}
-          </button>
+          {/* PDF Viewer (only visible if file is uploaded) */}
+          {file && (
+            <div className={styles.pdfViewer}>
+              <FaTimes className="cursor-pointer" size={20} onClick={closePdfViewer} />
+              <Worker workerUrl={`https://unpkg.com/pdfjs-dist@2.16.105/build/pdf.worker.min.js`}>
+                <Viewer
+                  fileUrl={URL.createObjectURL(file)}
+                  onLoadError={(error) => {
+                    console.error("Error loading PDF:", error);
+                    setPdfError(true); // Set error state if PDF loading fails
+                  }}
+                />
+              </Worker>
 
-          {/* Summary Output */}
-          <div className={styles.summaryOutput}>
-            <h2>Conclusion:</h2>
-            <p>{summary}</p>
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

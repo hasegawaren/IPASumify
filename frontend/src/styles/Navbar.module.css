@@ -1,117 +1,123 @@
 .navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    height: 80px;
-    padding: 10px 40px;
-    background: transparent;
-    position: fixed;
-    top: 20px;
-    left: 0;
-    z-index: 1000;
-  }
-  
-  /* โลโก้ */
-  .logoContainer {
-    display: flex;
-    align-items: center;
-  }
-  
-  .logo {
-    width: 190px; /* ปรับขนาดโลโก้ให้พอดี */
-    height: auto;
-  }
-  
-  .logoText {
-    font-size: 30px;
-    font-weight: bold;
-    color: #333;
-  }
-  
-  /* เมนูหลัก */
-  .menu {
-    display: flex;
-    gap: 15px;
-    align-items: center;
-  }
-  
-  /* เมนูที่ไม่ได้เลือก (inactive) */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  height: 80px;
+  padding: 10px 40px;
+  background: transparent;
+  position: fixed;
+  top: 10px;
+  left: 0;
+  z-index: 1000;
+}
+
+/* โลโก้ */
+.logoContainer {
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  width: 190px;
+  /* ปรับขนาดโลโก้ให้พอดี */
+  height: auto;
+}
+
+.logoText {
+  font-size: 30px;
+  font-weight: bold;
+  color: #333;
+}
+
+/* เมนูหลัก */
+.menu {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+/* เมนูที่ไม่ได้เลือก (inactive) */
 .menuItem.inactive {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
-    border: 2px solid #898989; /* กรอบสีดำ */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.5s ease-in-out;
-    position: relative; /* เพื่อให้สามารถเพิ่มข้อความได้ */
-  }
-  
-  .menuItem.inactive:hover {
-    border-color: rgba(0, 0, 0, 0.5);
-    transform: scale(1.1);
-  }
-  
-  /* ตัวอักษรชื่อเมนู */
-  .menuItem.inactive span {
-    position: absolute;
-    bottom: -20px; /* ปรับตำแหน่งของตัวอักษรให้ด้านล่าง */
-    font-size: 12px;
-    color: #000000;
-    opacity: 0; /* เริ่มต้นให้ซ่อน */
-    transition: opacity 0.4s ease-in-out;
-  }
-  
-  /* เมื่อเมนู hover หรือเมื่อมีการขยาย */
-  .menuItem.inactive:hover span {
-    opacity: 1;
-  }
-  
-  /* เอฟเฟกต์เปลี่ยนเมนูให้สมูทขึ้น */
-  .menuItem {
-    opacity: 1;
-    transition: all 0.6s ease-in-out;
-  }
-  
-  .menuItem.active {
-    background: #605eff;
-    color: white;
-    font-weight: 600;
-    border-radius: 50px;
-    width: 60px;
-    height: 60px;
-    max-width: 250px;
-    padding: 10px 25px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    box-shadow: 0 4px 10px rgba(4, 26, 225, 0.4);
-    transform-origin: left; /* ให้ปุ่มขยายจากซ้ายไปขวา */
-    transition: all 0.6s ease-in-out;
-    overflow: hidden;
-  }
-  
-  
-  /* เมื่อ Active แล้วขยายเต็ม */
-  .menuItem.active.expand {
-    width: auto;
-    max-width: 280px;
-    border-radius: 999px;
-    padding: 12px 30px;
-    transition: all 0.6s ease-in-out;
-  }
-  
-  /* ตัวอักษรค่อย ๆ ขึ้นทีละตัว */
-  .menuItem.active span {
-    opacity: 0;
-    transform: translateY(10px);
-    transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
-  }
-  
-  /* แสดงตัวอักษรทีละตัวเมื่อปุ่มขยาย */
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid #898989;
+  /* กรอบสีดำ */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.5s ease-in-out;
+  position: relative;
+  /* เพื่อให้สามารถเพิ่มข้อความได้ */
+}
+
+.menuItem.inactive:hover {
+  border-color: rgba(0, 0, 0, 0.5);
+  transform: scale(1.1);
+}
+
+/* ตัวอักษรชื่อเมนู */
+.menuItem.inactive span {
+  position: absolute;
+  bottom: -20px;
+  /* ปรับตำแหน่งของตัวอักษรให้ด้านล่าง */
+  font-size: 12px;
+  color: #000000;
+  opacity: 0;
+  /* เริ่มต้นให้ซ่อน */
+  transition: opacity 0.4s ease-in-out;
+}
+
+/* เมื่อเมนู hover หรือเมื่อมีการขยาย */
+.menuItem.inactive:hover span {
+  opacity: 1;
+}
+
+/* เอฟเฟกต์เปลี่ยนเมนูให้สมูทขึ้น */
+.menuItem {
+  opacity: 1;
+  transition: all 0.6s ease-in-out;
+}
+
+.menuItem.active {
+  background: #605eff;
+  color: white;
+  font-weight: 600;
+  border-radius: 50px;
+  width: 60px;
+  height: 60px;
+  max-width: 250px;
+  padding: 10px 25px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 10px rgba(4, 26, 225, 0.4);
+  transform-origin: left;
+  /* ให้ปุ่มขยายจากซ้ายไปขวา */
+  transition: all 0.6s ease-in-out;
+  overflow: hidden;
+}
+
+
+/* เมื่อ Active แล้วขยายเต็ม */
+.menuItem.active.expand {
+  width: auto;
+  max-width: 280px;
+  border-radius: 999px;
+  padding: 12px 30px;
+  transition: all 0.6s ease-in-out;
+}
+
+/* ตัวอักษรค่อย ๆ ขึ้นทีละตัว */
+.menuItem.active span {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
+}
+
+/* แสดงตัวอักษรทีละตัวเมื่อปุ่มขยาย */
 .menuItem.active.expand span {
   opacity: 1;
   transform: translateY(0);
@@ -119,151 +125,153 @@
 }
 
 .menuItem.active:hover {
-    transform: scale(1.07);
-  }
-  
-  /* เมนูที่ถูกเลือก */
-  .menuItem.activeStore {
-    background: #2d6ded;
-    color: white;
-    font-weight: 600;
-    border-radius: 999px;
-    padding: 12px 25px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    box-shadow: 0 4px 10px rgba(45, 109, 237, 0.4);
-    transition: all 0.4s ease-in-out;
-  }
-  
-  .menuItem.activeStore:hover {
-    transform: scale(1.07);
-  }
-  
-  /* เอฟเฟกต์เมนู Summarize */
-  .menuItem.activeInterior {
-    background: #ffb331;
-    color: white;
-    font-weight: 600;
-    border-radius: 50px;
-    width: 60px;
-    height: 60px;
-    max-width: 250px;
-    padding: 10px 25px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    box-shadow: 0 4px 10px rgba(255, 156, 90, 0.4);
-    transform-origin: left; /* ให้ปุ่มขยายจากซ้ายไปขวา */
-    transition: all 0.6s ease-in-out;
-    overflow: hidden;
+  transform: scale(1.07);
+}
+
+/* เมนูที่ถูกเลือก */
+.menuItem.activeStore {
+  background: #2d6ded;
+  color: white;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 12px 25px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 10px rgba(45, 109, 237, 0.4);
+  transition: all 0.4s ease-in-out;
+}
+
+.menuItem.activeStore:hover {
+  transform: scale(1.07);
+}
+
+/* เอฟเฟกต์เมนู Summarize */
+.menuItem.activeInterior {
+  background: #ffb331;
+  color: white;
+  font-weight: 600;
+  border-radius: 50px;
+  width: 60px;
+  height: 60px;
+  max-width: 250px;
+  padding: 10px 25px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 10px rgba(255, 156, 90, 0.4);
+  transform-origin: left;
+  /* ให้ปุ่มขยายจากซ้ายไปขวา */
+  transition: all 0.6s ease-in-out;
+  overflow: hidden;
+}
+
+/* เมื่อ Active แล้วขยายเต็ม */
+.menuItem.activeInterior.expand {
+  width: auto;
+  max-width: 280px;
+  border-radius: 999px;
+  padding: 12px 30px;
+  transition: all 0.6s ease-in-out;
+}
+
+/* ตัวอักษรค่อย ๆ ขึ้นทีละตัว */
+.menuItem.activeInterior span {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
+}
+
+.menuItem.activeInterior.expand span {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 0.3s;
+}
+
+.menuItem.activeInterior:hover {
+  transform: scale(1.07);
+}
+
+/* เอฟเฟกต์ไอคอน */
+.menuIcon {
+  width: 32px;
+  height: 32px;
+  transition: transform 0.4s ease-in-out;
+}
+
+.menuItem.activeStore .menuIcon,
+.menuItem.activeInterior .menuIcon {
+  transform: translateY(-3px);
+  animation: bounce 1s infinite alternate ease-in-out;
+}
+
+/* เอฟเฟกต์การกระเด้ง */
+@keyframes bounce {
+  0% {
+    transform: translateY(0);
   }
 
-    /* เมื่อ Active แล้วขยายเต็ม */
-    .menuItem.activeInterior.expand {
-        width: auto;
-        max-width: 280px;
-        border-radius: 999px;
-        padding: 12px 30px;
-        transition: all 0.6s ease-in-out;
-      }
-      
-      /* ตัวอักษรค่อย ๆ ขึ้นทีละตัว */
-      .menuItem.activeInterior span {
-        opacity: 0;
-        transform: translateY(10px);
-        transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
-      }
-
-      .menuItem.activeInterior.expand span {
-        opacity: 1;
-        transform: translateY(0);
-        transition-delay: 0.3s;
-      }
-  
-  .menuItem.activeInterior:hover {
-    transform: scale(1.07);
-  }
-  
-  /* เอฟเฟกต์ไอคอน */
-  .menuIcon {
-    width: 32px;
-    height: 32px;
-    transition: transform 0.4s ease-in-out;
-  }
-  
-  .menuItem.activeStore .menuIcon,
-  .menuItem.activeInterior .menuIcon {
+  100% {
     transform: translateY(-3px);
-    animation: bounce 1s infinite alternate ease-in-out;
   }
-  
-  /* เอฟเฟกต์การกระเด้ง */
-  @keyframes bounce {
-    0% {
-      transform: translateY(0);
-    }
-    100% {
-      transform: translateY(-3px);
-    }
+}
+
+/* ปุ่มเปลี่ยนภาษา */
+.languageButton {
+  background: rgb(0, 0, 0);
+  color: rgb(255, 255, 255);
+  border: none;
+  padding: 10px 25px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+}
+
+/* Hover Effect */
+.languageButton:hover {
+  background: #60a5fa;
+  transform: scale(1.1);
+}
+
+@media (max-width: 1024px) {
+  .navbar {
+    padding: 10px 30px;
   }
-  
-  /* ปุ่มเปลี่ยนภาษา */
-  .languageButton {
-    background: rgb(0, 0, 0);
-    color: rgb(255, 255, 255);
-    border: none;
-    padding: 15px 30px;
-    border-radius: 999px;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease-in-out;
+
+  .logo {
+    width: 160px;
   }
-  
-  /* Hover Effect */
-  .languageButton:hover {
-    background: #60a5fa;
-    transform: scale(1.1);
+
+  .menu {
+    gap: 10px;
   }
-  
-  @media (max-width: 1024px) {
-    .navbar {
-        padding: 10px 30px;
-    }
 
-    .logo {
-        width: 160px;
-    }
+  .menuItem.inactive {
+    width: 50px;
+    height: 50px;
+  }
 
-    .menu {
-        gap: 10px;
-    }
-
-    .menuItem.inactive {
-        width: 50px;
-        height: 50px;
-    }
-
-    .menuItem.inactive span {
-        font-size: 10px;
-    }
+  .menuItem.inactive span {
+    font-size: 10px;
+  }
 }
 
 /* Responsive สำหรับหน้าจอขนาดเล็ก (เช่น Mobile) */
 @media (max-width: 768px) {
 
-    .logo {
-        width: 120px;
-    }
+  .logo {
+    width: 120px;
+  }
 
-    .menuItem.inactive {
-        width: 60px;
-        height: 60px;
-    }
+  .menuItem.inactive {
+    width: 60px;
+    height: 60px;
+  }
 
-    .menuItem.inactive span {
-        font-size: 14px;
-    }
+  .menuItem.inactive span {
+    font-size: 14px;
+  }
 
 }

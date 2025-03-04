@@ -11,12 +11,11 @@ export default function Home() {
         {/* Left Content */}
         <div className="md:w-1/2 space-y-6">
           <h1 className="text-5xl font-bold text-black leading-tight">
-            No prompt engineering needed, just{" "}
-            <span className="italic">ask</span>
+          Summarize PDF, Wiki link and Text with{" "}
+            <span className="italic">Sumify</span>
           </h1>
           <p className={styles.formContainer}>
-            Be as simple or as specific. Talk in your own way to generate, edit, and move 
-            through your explorations fluently.
+          An AI-powered summarization tool that supports both Thai and English. Simply paste a Wikipedia URL or upload a PDF file, and the system will generate a concise, easy-to-understand summary—saving you time and effort in reading!
           </p>
         </div>
 

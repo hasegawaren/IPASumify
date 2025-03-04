@@ -1,15 +1,14 @@
 
 .container {
   min-height: 80vh;
-  background-image: url('/images/6.png'); /* เปลี่ยนเส้นทางเป็นภาพที่คุณต้องการ */
-  background-size: cover; /* ทำให้ภาพครอบคลุมพื้นที่ */
-  background-position: center; /* จัดตำแหน่งภาพให้อยู่ตรงกลาง */
-  background-repeat: no-repeat; /* ห้ามทำการซ้ำของภาพ */
+  background-image: url('/images/6.png'); 
+  background-size: cover; 
+  background-position: center;
+  background-repeat: no-repeat; 
   display: flex;
   flex-direction: column;
 }
 
-  
 .formContainer {
   width: 100%;
   max-width: 1100px;
