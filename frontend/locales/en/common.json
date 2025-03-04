@@ -1,0 +1,24 @@
+{
+  "navbar": {
+    "home": "Home",
+    "summarize": "Summarize",
+    "language": "🌐 EN"
+  },
+  "homePage": {
+    "title": "Summarize PDF, Wiki link and Text with Sumify",
+    "description": "An AI-powered summarization tool that supports both Thai and English. Simply paste a Wikipedia URL or upload a PDF file, and the system will generate a concise, easy-to-understand summary—saving you time and effort in reading!",
+    "example1": "Example 1",
+    "example2": "Example 2",
+    "example3": "Example 3",
+    "contentTitle": "AI-Powered Summarization",
+    "contentSubtitle": "Revolutionizing the way you summarize documents",
+    "contentFeature1": "Summarize PDFs, Wikipedia links, and plain text",
+    "contentFeature2": "Supports both Thai and English languages",
+    "contentFeature3": "Save time by reading only key points",
+    "uploadLabel": "Upload your PDF file here",
+    "pasteLinkLabel": "Paste your Wikipedia link here",
+    "submitButton": "Generate Summary",
+    "loadingText": "Processing your document...",
+    "errorMessage": "Something went wrong. Please try again."
+  }
+}
