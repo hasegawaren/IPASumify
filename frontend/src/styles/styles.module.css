@@ -1,6 +1,6 @@
 
 .container {
-  min-height: 80vh;
+  min-height: 100vh;
   background-image: url('/images/6.png'); 
   background-size: cover; 
   background-position: center;
@@ -11,7 +11,7 @@
 
 .formContainer {
   width: 100%;
-  max-width: 1100px;
+  max-width: 1000px;
   background-size: cover;
   background-position: center;
   border-radius: 1.5rem;
