@@ -2,10 +2,11 @@
   "navbar": {
     "home": "Home",
     "summarize": "Summarize",
-    "language": "🌐 EN"
+    "language": " EN"
   },
   "homePage": {
-    "title": "Summarize PDF, Wiki link and Text with Sumify",
+    "title": "Summarize PDF, Wiki link and Text with",
+    "title2": " Sumify",
     "description": "An AI-powered summarization tool that supports both Thai and English. Simply paste a Wikipedia URL or upload a PDF file, and the system will generate a concise, easy-to-understand summary—saving you time and effort in reading!",
     "example1": "Example 1",
     "example2": "Example 2",

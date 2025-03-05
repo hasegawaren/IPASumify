@@ -4,6 +4,7 @@ import setLanguage from "next-translate/setLanguage";
 import styles from "@/styles/Navbar.module.css";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { Globe } from "lucide-react";
 
 export default function Navbar() {
     const router = useRouter();
@@ -41,7 +42,12 @@ export default function Navbar() {
             </div>
 
             {/* ปุ่มเปลี่ยนภาษา */}
-            <button className={styles.languageButton} onClick={toggleLanguage}>
+
+            <button
+                onClick={toggleLanguage}
+                className="flex items-center gap-2 px-5 py-2 rounded-full bg-gradient-to-r from-black to-gray-800 text-white font-semibold text-lg shadow-md hover:scale-105 hover:bg-blue-500 transition-all duration-300"
+            >
+                <Globe size={20} className="text-yellow-400" />
                 {t("navbar.language")}
             </button>
         </nav>
