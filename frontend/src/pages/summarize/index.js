@@ -1,63 +1,20 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import Navbar from "@/components/Navbar";
-import { FaPaperclip, FaLink, FaTimes } from "react-icons/fa"; // Icons for file and link
-import { Worker, Viewer } from '@react-pdf-viewer/core'; // Import pdf viewer
-import '@react-pdf-viewer/core/lib/styles/index.css'; // Required CSS for pdf viewer
-import { pdfjs } from "react-pdf";
+import { FaPaperclip, FaLink, FaTimes } from "react-icons/fa"; 
+import { Worker, Viewer } from '@react-pdf-viewer/core';
+import '@react-pdf-viewer/core/lib/styles/index.css';
 import styles from "@/styles/Summarize.module.css";
 
 export default function Summarize() {
   const [file, setFile] = useState(null);
-  const [numPages, setNumPages] = useState(null);
-  const [summary, setSummary] = useState("");
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [pdfError, setPdfError] = useState(false);
   const [showLinkInput, setShowLinkInput] = useState(false);
   const [wikiLink, setWikiLink] = useState("");
   const chatContainerRef = useRef(null);
   const [isPdfOpen, setIsPdfOpen] = useState(false); // Track if PDF is open
-
-  useEffect(() => {
-    // Simulating loading a PDF file and its summary
-    setChatMessages([
-      { sender: "AI", text: "This document is a report about the climate change in Thailand in 2024..." },
-      { sender: "User", text: "Which region is most affected?" },
-      { sender: "AI", text: "The northern region is the most affected..." },
-    ]);
-  }, []);
-
-  useEffect(() => {
-    // Scroll to the latest message when a new message is added
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-    }
-  }, [chatMessages]);
-
-  // Handle PDF file load success
-  const onDocumentLoadSuccess = ({ numPages }) => {
-    setNumPages(numPages);
-    setPdfError(false); // Reset error when the document is loaded successfully
-  };
-
-  const closePdfViewer = () => {
-    setFile(null);
-    setIsPdfOpen(false); // Close PDF and reset state
-  };
-
-  const handleFileChange = (event) => {
-    const uploadedFile = event.target.files[0];
-    if (uploadedFile && uploadedFile.type === "application/pdf") {
-      setFile(uploadedFile);
-      setIsPdfOpen(true); // Set PDF as open
-      setPdfError(false);
-    } else {
-      setFile(null);
-      setPdfError(true);
-    }
-  };
 
   // Handle chat submit
   const handleChatSubmit = async (e) => {
@@ -67,22 +24,58 @@ export default function Summarize() {
     const userMessage = { sender: "User", text: chatInput };
     setChatMessages((prev) => [...prev, userMessage]);
     setChatInput("");
+    
+    setLoading(true);
+
+    const formData = new FormData();
+
+    if (file) {
+      formData.append("input_type", "pdf");
+      formData.append("pdf_file", file);
+    } else if (wikiLink) {
+      formData.append("input_type", "wiki");
+      formData.append("wiki_url", wikiLink);
+    } else {
+      formData.append("input_type", "text");
+      formData.append("user_text", chatInput);
+    }
 
     try {
-      const response = await axios.post("http://localhost:8000/api/chat", {
-        message: chatInput,
-        context: summary,
+      const response = await axios.post("http://localhost:8000/api/debug-summarize", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
+
       setChatMessages((prev) => [
         ...prev,
-        { sender: "AI", text: response?.data?.reply || "Unable to respond." },
+        { sender: "AI", text: response.data.final_text || "Unable to respond." },
       ]);
     } catch (error) {
       setChatMessages((prev) => [
         ...prev,
         { sender: "AI", text: "An error occurred while answering." },
       ]);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  // Handle file change
+  const handleFileChange = (event) => {
+    const uploadedFile = event.target.files[0];
+    if (uploadedFile && uploadedFile.type === "application/pdf") {
+      setFile(uploadedFile);
+      setIsPdfOpen(true);
+    } else {
+      setFile(null);
+    }
+  };
+
+  // Close PDF viewer
+  const closePdfViewer = () => {
+    setFile(null);
+    setIsPdfOpen(false); // Close PDF and reset state
   };
 
   // Handle link submission
@@ -95,6 +88,15 @@ export default function Summarize() {
     setWikiLink("");
     setShowLinkInput(false);  // Hide the link input after submission
   };
+
+  useEffect(() => {
+    // Simulating loading a PDF file and its summary
+    setChatMessages([
+      { sender: "AI", text: "This document is a report about the climate change in Thailand in 2024..." },
+      { sender: "User", text: "Which region is most affected?" },
+      { sender: "AI", text: "The northern region is the most affected..." },
+    ]);
+  }, []);
 
   return (
     <div className={styles.container}>
@@ -126,18 +128,8 @@ export default function Summarize() {
             {/* Input Form */}
             <form onSubmit={handleChatSubmit} className={styles.chatInputForm}>
               <div className="flex items-center gap-2">
-                <FaPaperclip
-                  size={30}
-                  className="cursor-pointer"
-                  style={{ color: '#4A90E2' }} 
-                  onClick={() => document.getElementById('fileInput').click()}
-                />
-                <FaLink
-                  size={30}
-                  className="cursor-pointer"
-                  style={{ color: '#FF6347' }}  
-                  onClick={() => setShowLinkInput(true)}
-                />
+                <FaPaperclip size={30} className="cursor-pointer" style={{ color: '#FF6347' }}  onClick={() => document.getElementById('fileInput').click()} />
+                <FaLink size={30} className="cursor-pointer"  style={{ color: '#4A90E2' }}  onClick={() => setShowLinkInput(true)} />
                 <input
                   type="text"
                   value={chatInput}
@@ -160,7 +152,6 @@ export default function Summarize() {
               className={styles.fileInput}
               style={{ display: "none" }}
             />
-            {pdfError && <p className="text-red-500 text-center">Please upload a valid PDF file.</p>}
 
             {/* Link input modal */}
             {showLinkInput && (
@@ -192,11 +183,10 @@ export default function Summarize() {
                   fileUrl={URL.createObjectURL(file)}
                   onLoadError={(error) => {
                     console.error("Error loading PDF:", error);
-                    setPdfError(true); // Set error state if PDF loading fails
+                    setPdfError(true);
                   }}
                 />
               </Worker>
-
             </div>
           )}
         </div>
