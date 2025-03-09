@@ -128,7 +128,7 @@ export default function Summarize() {
             {/* Input Form */}
             <form onSubmit={handleChatSubmit} className={styles.chatInputForm}>
               <div className="flex items-center gap-2">
-                <FaPaperclip size={30} className="cursor-pointer" style={{ color: '#FF6347' }}  onClick={() => document.getElementById('fileInput').click()} />
+                <FaPaperclip size={30} className="cursor-pointer"   style={{ color: '#FF6347' }}  onClick={() => document.getElementById('fileInput').click()} />
                 <FaLink size={30} className="cursor-pointer"  style={{ color: '#4A90E2' }}  onClick={() => setShowLinkInput(true)} />
                 <input
                   type="text"

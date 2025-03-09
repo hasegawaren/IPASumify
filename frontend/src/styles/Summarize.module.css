@@ -50,7 +50,7 @@
 
 /* Chat container styling */
 .chatContainer {
-  width: 40%;
+  width: 50%;
   background-color: #ffffff;
   border-radius: 1rem;
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.15);
@@ -125,23 +125,19 @@
   padding: 1.25rem;
   border-top: 1px solid #e4e7eb;
   display: flex;
-  gap: 1rem;
-  width: 100%; /* Ensure form takes the full width */
-  position: relative;
+  overflow-x: hidden
 }
 
 .chatInput {
-  flex-grow: 1;
   padding: 10px;
   border-radius: 12px;
   border: 1px solid #e4e7eb;
   font-size: 1rem;
   outline: none;
   transition: all 0.3s;
-  width: 100%;  /* Adjust width to take up the full available width */
-  max-width: 600px; /* Set a maximum width for the input box */
+  height: 50px;
+  width: 500px; /* This will ensure it expands to fill the space */
 }
-
 
 .submitButton {
   padding: 5px 20px;
@@ -151,14 +147,13 @@
   border-radius: 1rem;
   cursor: pointer;
   transition: background-color 0.3s;
-  min-width: 100px; /* Set a minimum width for consistency */
+  min-width: 100px;
+  margin-left: auto; /* Push the submit button to the right */
 }
 
 .submitButton:hover {
   background-color: #3182ce;
 }
-
-
 
 .chatInput:focus {
   border-color: #4299e1;
