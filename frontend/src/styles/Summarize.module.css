@@ -230,3 +230,42 @@
   background-color: #c53030;
 }
 
+/* Summarize.module.css */
+.pendingLinkContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px;
+  background-color: #f0f0f0;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.pendingLinkText {
+  color: #4a90e2;
+  word-break: break-all;
+}
+
+.openLinkIcon {
+  margin-left: 8px;
+  color: #4a90e2;
+}
+
+.openLinkIcon:hover {
+  color: #2a6bc1;
+}
+
+.pendingLinkText a {
+  color: #4a90e2;
+  text-decoration: underline;
+}
+
+.pendingLinkText a:hover {
+  color: #2a6bc1;
+}
+
+.cancelLinkIcon {
+  cursor: pointer;
+  color: #ff6347;
+  margin-left: 8px;
+}
