@@ -5,6 +5,7 @@ import { FaPaperclip, FaLink, FaTimes, FaExternalLinkAlt } from "react-icons/fa"
 import { Worker, Viewer } from "@react-pdf-viewer/core";
 import "@react-pdf-viewer/core/lib/styles/index.css";
 import styles from "@/styles/Summarize.module.css";
+import useTranslation from "next-translate/useTranslation";
 
 export default function Summarize() {
   const [file, setFile] = useState(null);
@@ -18,6 +19,7 @@ export default function Summarize() {
   const chatContainerRef = useRef(null);
   const [isPdfOpen, setIsPdfOpen] = useState(false);
   const [sessionId, setSessionId] = useState(null);
+  const { t } = useTranslation("common");
 
   // ✅ ใช้ useEffect เพื่อสร้างและล้าง URL อย่างถูกต้อง
   useEffect(() => {
@@ -210,12 +212,12 @@ export default function Summarize() {
                   type="text"
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value)}
-                  placeholder={sessionId ? "Ask a question about the summary..." : "Enter text, upload a PDF, or provide a Wikipedia link..."}
+                  placeholder={sessionId ? t("sumPage.chatbox2") : t("sumPage.chatbox1")}
                   className={styles.chatInput}
                 />
               </div>
               <button type="submit" className={styles.submitButton}>
-                {sessionId ? "Ask" : "Summarize"}
+                {sessionId ? t("sumPage.ask_button") : t("sumPage.sum_button")}
               </button>
             </form>
 
@@ -226,20 +228,20 @@ export default function Summarize() {
             {showLinkInput && (
               <div className={styles.linkModal}>
                 <div className={styles.linkModalContent}>
-                  <h3>Enter the Wikipedia Link:</h3>
+                  <h3>{t("sumPage.dialog_title")}</h3>
                   <input
                     type="text"
                     value={wikiLink}
                     onChange={(e) => setWikiLink(e.target.value)}
-                    placeholder="Enter URL"
+                    placeholder={t("sumPage.dialog_input")}
                     className={styles.chatInput}
                   />
                   <div>
                     <button onClick={handleLinkSubmit} className={styles.submitButton}>
-                      Submit Link
+                    {t("sumPage.dialog_ok")}
                     </button>
                     <button onClick={() => setShowLinkInput(false)} className={styles.cancelButton}>
-                      Cancel
+                    {t("sumPage.dialog_cancel")}
                     </button>
                   </div>
                 </div>

@@ -21,6 +21,16 @@
       "submitButton": "สร้างสรุป",
       "loadingText": "กำลังประมวลผลเอกสารของคุณ...",
       "errorMessage": "เกิดข้อผิดพลาด กรุณาลองอีกครั้ง"
-    }
+    },
+    "sumPage": {
+    "chatbox1": "ป้อนข้อความ อัปโหลดไฟล์ PDF หรือให้เว็บไซต์ Wikipedia...",
+    "chatbox2": "ถามคำถามเพื่อสรุปเนื้อหา...",
+    "sum_button": "สรุป",
+    "ask_button": "ถาม",
+    "dialog_title": "ใส่ลิงก์ Wikipedia:",
+    "dialog_input": "ใส่ URL",
+    "dialog_ok": "ยืนยันลิงก์",
+    "dialog_cancel": "ยกเลิก"
   }
+}
   
