@@ -5,6 +5,7 @@ import { FaPaperclip, FaLink, FaTimes, FaExternalLinkAlt } from "react-icons/fa"
 import { Worker, Viewer } from "@react-pdf-viewer/core";
 import "@react-pdf-viewer/core/lib/styles/index.css";
 import styles from "@/styles/Summarize.module.css";
+import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 
 export default function Summarize() {
   const [file, setFile] = useState(null);
@@ -14,21 +15,52 @@ export default function Summarize() {
   const [loading, setLoading] = useState(false);
   const [showLinkInput, setShowLinkInput] = useState(false);
   const [wikiLink, setWikiLink] = useState("");
-  const [pendingLink, setPendingLink] = useState(null); // ✅ เก็บลิงก์ที่รอการสรุป
+  const [pendingLink, setPendingLink] = useState(null);
   const chatContainerRef = useRef(null);
   const [isPdfOpen, setIsPdfOpen] = useState(false);
   const [sessionId, setSessionId] = useState(null);
+  const [wikiTOC, setWikiTOC] = useState([]);
+  const [selectedTopic, setSelectedTopic] = useState(null);
+  const [isTOCVisible, setIsTOCVisible] = useState(false);
 
-  // ✅ ใช้ useEffect เพื่อสร้างและล้าง URL อย่างถูกต้อง
   useEffect(() => {
     if (file) {
       const url = URL.createObjectURL(file);
       setFileUrl(url);
-      return () => URL.revokeObjectURL(url); // ล้าง URL เมื่อ file เปลี่ยน
+      return () => URL.revokeObjectURL(url);
     } else {
       setFileUrl(null);
     }
   }, [file]);
+
+  useEffect(() => {
+    console.log("📌 Updated TOC in UI:", wikiTOC);
+  }, [wikiTOC]);
+
+  // ✅ ดึง TOC หลังจากที่มี sessionId แล้ว
+  useEffect(() => {
+    if (!sessionId || !pendingLink) return; // ✅ ต้องมี sessionId และ wiki_url
+
+    const fetchTOC = async () => {
+      const formData = new FormData();
+      formData.append("input_type", "wiki");
+      formData.append("session_id", sessionId);
+      formData.append("wiki_url", pendingLink); // ✅ ใช้ค่า wiki_url ที่ถูกต้อง
+
+      try {
+        const response = await axios.post("http://localhost:8000/api/summarize", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+
+        console.log("📌 Fetched TOC:", response.data.toc);
+        setWikiTOC(response.data.toc || []);
+      } catch (error) {
+        console.error("🔴 Error fetching TOC:", error);
+      }
+    };
+
+    fetchTOC();
+  }, [sessionId, pendingLink]);
 
   // ✅ ใช้ useCallback ป้องกันการสร้างฟังก์ชันใหม่ทุกครั้ง
   const handleFileChange = useCallback((event) => {
@@ -47,20 +79,11 @@ export default function Summarize() {
     setIsPdfOpen(false);
   }, []);
 
-  // ✅ ใช้ useMemo เพื่อป้องกันการสร้าง URL ใหม่ทุกครั้งที่ Component Render
   const memoizedFileUrl = useMemo(() => fileUrl, [fileUrl]);
 
-  // ✅ ฟังก์ชันสำหรับสรุปข้อมูล
   const handleSummarizeSubmit = async (e) => {
     e.preventDefault();
     if (!chatInput.trim() && !file && !pendingLink) return;
-
-    const userMessage = {
-      sender: "User",
-      text: chatInput || (file ? file.name : pendingLink),
-    };
-    setChatMessages((prev) => [...prev, userMessage]);
-    setChatInput("");
     setLoading(true);
 
     const formData = new FormData();
@@ -82,17 +105,58 @@ export default function Summarize() {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      const { session_id, summary } = response.data;
+      console.log("📌 API Response:", response.data);
+      const { session_id, summary, toc } = response.data;
       setSessionId(session_id);
+
+      if (toc) {
+        console.log("🟢 Setting TOC:", toc);
+        setWikiTOC(toc);
+      }
+
       setChatMessages((prev) => [...prev, { sender: "AI", text: summary || "Unable to summarize." }]);
     } catch (error) {
       setChatMessages((prev) => [...prev, { sender: "AI", text: "An error occurred while summarizing." }]);
     } finally {
       setLoading(false);
-      setPendingLink(null); // ✅ ล้าง pendingLink หลังจากสรุปเสร็จ
+      setPendingLink(null);
     }
   };
 
+  const handleSubTopicClick = async (topic) => {
+    console.log("🟢 Clicked topic:", topic);
+    if (!sessionId) return;
+  
+    setSelectedTopic(topic);
+    setLoading(true);
+  
+    const userMessage = { sender: "User", text: `ขอข้อมูลเพิ่มเติมเกี่ยวกับ "${topic}"` };
+    setChatMessages((prev) => [...prev, userMessage]);
+  
+    try {
+      const response = await axios.post("http://localhost:8000/api/chat", { 
+        session_id: sessionId, 
+        topic: topic, 
+    }, 
+        { headers: { "Content-Type": "application/json" } }
+      );
+  
+      const { answer } = response.data;
+      setChatMessages((prev) => [
+        ...prev,
+        { sender: "AI", text: answer || "ไม่มีข้อมูลเพิ่มเติมของหัวข้อนี้" },
+      ]);
+    } catch (error) {
+      console.error("Error fetching topic details:", error);
+      setChatMessages((prev) => [
+        ...prev,
+        { sender: "AI", text: "เกิดข้อผิดพลาดในการดึงข้อมูลของหัวข้อย่อย" },
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
   // ✅ ฟังก์ชันสำหรับแชทถาม-ตอบต่อจากข้อมูลที่สรุป
   const handleChatSubmit = async (e) => {
     e.preventDefault();
@@ -124,21 +188,39 @@ export default function Summarize() {
     try {
       const path = new URL(url).pathname;
       const title = path.split("/wiki/")[1]?.replace(/_/g, " ");
-      return title || url; // ถ้าแยกชื่อไม่ได้ ให้คืนค่า URL เดิม
+      return title || url;
     } catch (error) {
-      return url; // ถ้า URL ไม่ถูกต้อง ให้คืนค่า URL เดิม
+      return url;
     }
   };
 
   // ✅ ฟังก์ชันส่ง Wikipedia Link เพื่อพักไว้ด้านบน
-  const handleLinkSubmit = (e) => {
+  const handleLinkSubmit = async (e) => {
     e.preventDefault();
     if (!wikiLink.trim()) return;
 
-    // ✅ เพิ่มลิงก์ลงใน state pendingLink เพื่อแสดงด้านบน
-    setPendingLink(wikiLink);
-    setWikiLink("");
-    setShowLinkInput(false);
+    setPendingLink(wikiLink); // เก็บลิงก์ที่รอการสรุป
+    setWikiLink(""); // ล้างช่องอินพุต
+    setShowLinkInput(false); // ปิด modal
+    setLoading(true); // แสดงสถานะ loading
+
+    const formData = new FormData();
+    formData.append("input_type", "wiki");
+    formData.append("wiki_url", wikiLink);
+
+    try {
+      const response = await axios.post("http://localhost:8000/api/summarize", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      const { session_id, summary } = response.data;
+      setSessionId(session_id);
+      setChatMessages((prev) => [...prev, { sender: "AI", text: summary || "Unable to summarize." }]);
+    } catch (error) {
+      setChatMessages((prev) => [...prev, { sender: "AI", text: "An error occurred while summarizing." }]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // ✅ ฟังก์ชันยกเลิกการเพิ่มลิงก์
@@ -152,6 +234,7 @@ export default function Summarize() {
     }
   }, [chatMessages]);
 
+
   return (
     <div className={styles.container}>
       <Navbar />
@@ -162,6 +245,47 @@ export default function Summarize() {
             <div className={styles.chatHeader}>
               <h2>Sumify Chat</h2>
             </div>
+
+            {pendingLink && (
+              <div className={styles.pendingLinkContainer}>
+                <span className={styles.pendingLinkText}>
+                  Wikipedia: {getWikiTitle(pendingLink)}
+                  <a href={pendingLink} target="_blank" rel="noopener noreferrer" className={styles.openLinkIcon}>
+                    <FaExternalLinkAlt />
+                  </a>
+                </span>
+                <FaTimes className={styles.cancelLinkIcon} onClick={handleCancelLink} />
+              </div>
+            )}
+
+            {Array.isArray(wikiTOC) && wikiTOC.length > 0 && (
+              <div className={styles.tocContainer}>
+                {/* ✅ ปุ่มกดพับ-ขยาย TOC */}
+                <div
+                  className={styles.tocHeader}
+                  onClick={() => setIsTOCVisible(!isTOCVisible)}
+                >
+                  📖 หัวข้อย่อย:
+                  {isTOCVisible ? <FaChevronUp /> : <FaChevronDown />}
+                </div>
+
+                {/* ✅ แสดง TOC เมื่อกดเปิด */}
+                {isTOCVisible && (
+                  <div className={styles.tocList}>
+                    {wikiTOC.map((topic, index) => (
+                      <span
+                        key={`topic-${index}`} // ✅ ให้ key มีความเป็นเอกลักษณ์มากขึ้น
+                        className={styles.tocItem}
+                        onClick={() => handleSubTopicClick(topic)}
+                        title={topic} // ✅ แสดง Tooltip เมื่อ Hover
+                      >
+                        {topic}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
 
             <div ref={chatContainerRef} className={styles.chatArea}>
               {loading ? (
@@ -187,19 +311,6 @@ export default function Summarize() {
                 ))
               )}
             </div>
-
-            {/* ✅ แสดงลิงก์ที่รอการสรุปด้านบนของช่อง input */}
-            {pendingLink && (
-              <div className={styles.pendingLinkContainer}>
-                <span className={styles.pendingLinkText}>
-                  Pending Link: {getWikiTitle(pendingLink)}
-                  <a href={pendingLink} target="_blank" rel="noopener noreferrer" className={styles.openLinkIcon}>
-                    <FaExternalLinkAlt />
-                  </a>
-                </span>
-                <FaTimes className={styles.cancelLinkIcon} onClick={handleCancelLink} />
-              </div>
-            )}
 
             {/* Input Form */}
             <form onSubmit={sessionId ? handleChatSubmit : handleSummarizeSubmit} className={styles.chatInputForm}>
