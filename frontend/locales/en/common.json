@@ -21,5 +21,15 @@
     "submitButton": "Generate Summary",
     "loadingText": "Processing your document...",
     "errorMessage": "Something went wrong. Please try again."
+  },
+  "sumPage": {
+    "chatbox1": "Enter text, upload a PDF, or provide a Wikipedia link...",
+    "chatbox2": "Ask a question about the summary...",
+    "sum_button": "summarize",
+    "ask_button": "Ask",
+    "dialog_title": "Enter the Wikipedia Link:",
+    "dialog_input": "Enter URL",
+    "dialog_ok": "Submit Link",
+    "dialog_cancel": "Cancel"
   }
 }

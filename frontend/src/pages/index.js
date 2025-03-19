@@ -11,11 +11,15 @@ export default function Home() {
       <Navbar />
       <div className="flex flex-col md:flex-row items-center justify-center max-w-6xl mx-auto px-6 py-40 pt-46 sticky-content font-sans">
         <div className="md:w-1/2 space-y-6">
-          <h1 className="text-5xl font-bold text-black leading-tight">
+          <h1 className="text-5xl font-bold text-black leading-tight flex items-center">
             {t("homePage.title")}
-            <span className="italic text-yellow-300"> {t("homePage.title2")}</span>
-          </h1>
 
+          </h1>
+          <img
+            src="/images/logo-home.png"
+            alt="Sumify Logo"
+            className="w-200 h-20 ml-200"
+          />
           <p className={styles.formContainer}>
             {t("homePage.description")}
           </p>

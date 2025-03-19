@@ -14,8 +14,8 @@ from PyPDF2 import PdfReader
 from dotenv import load_dotenv
 import uuid
 import asyncio
+from fastapi import Request
 
-# ✅ ตั้งค่า Logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 load_dotenv()
@@ -40,7 +40,6 @@ sessions: Dict[str, Dict] = {}
 MAX_TOKENS = 4000
 MAX_PDF_SIZE_MB = 10
 
-# ✅ ดึงหัวข้อย่อยจาก PDF (Table of Contents)
 def extract_pdf_toc(content: bytes) -> List[Dict[str, str]]:
     pdf_document = fitz.open(stream=content, filetype="pdf")
     toc = pdf_document.get_toc()
@@ -48,7 +47,6 @@ def extract_pdf_toc(content: bytes) -> List[Dict[str, str]]:
     
     return [{"title": entry[1], "page": entry[2]} for entry in toc] if toc else []
 
-# ✅ ใช้ pdfplumber เพื่อดึงข้อความจาก PDF ที่ซับซ้อน
 async def extract_text_from_pdf(content: bytes) -> str:
     pdf_reader = PdfReader(io.BytesIO(content))
     extracted_texts = []
@@ -66,7 +64,6 @@ async def extract_text_from_pdf(content: bytes) -> str:
     extracted_text = re.sub(r"\s+", " ", " ".join(extracted_texts).strip())
     return extracted_text
 
-# ✅ ใช้ batch processing เพื่อให้ API ทำงานเร็วขึ้น
 async def get_deepseek_response_batch(chunks: List[str]) -> List[str]:
     tasks = [
         get_deepseek_response([{"role": "user", "content": f"โปรดสรุปข้อมูลนี้:\n\n{chunk}"}]) 
@@ -83,7 +80,7 @@ async def get_deepseek_response(messages: List[Dict[str, str]]) -> str:
     retries = 3
     for attempt in range(retries):
         try:
-            async with httpx.AsyncClient(timeout=60.0) as client:  # เพิ่ม Timeout เป็น 60 วินาที
+            async with httpx.AsyncClient(timeout=60.0) as client:
                 response = await client.post(deepseek_api_url, json=payload, headers=headers)
                 response.raise_for_status()
                 response_data = response.json()
@@ -96,38 +93,36 @@ async def get_deepseek_response(messages: List[Dict[str, str]]) -> str:
 async def fetch_wikipedia_content(wiki_url: str) -> Dict[str, str]:
     """ 🔹 ดึงข้อมูลจาก Wikipedia พร้อมหัวข้อย่อย (TOC) """
     try:
-        parsed_url = httpx.URL(wiki_url)
-        domain_parts = parsed_url.host.split(".")
-        if len(domain_parts) < 3 or domain_parts[1] != "wikipedia":
-            raise ValueError("Invalid Wikipedia URL")
-
-        lang_code = domain_parts[0] if domain_parts[0] != "www" else "en"
-        page_title = wiki_url.split("/wiki/")[-1]
-
-        wikipedia_api_url = f"https://{lang_code}.wikipedia.org/wiki/{page_title}"
+        logging.info(f"🌍 Fetching Wikipedia URL: {wiki_url}")
 
         async with httpx.AsyncClient() as client:
-            response = await client.get(wikipedia_api_url)
+            response = await client.get(wiki_url)
             response.raise_for_status()
             html_content = response.text
 
-        # 🔹 ใช้ BeautifulSoup วิเคราะห์ HTML
         soup = BeautifulSoup(html_content, "html.parser")
 
-        # ✅ ดึงเนื้อหาย่อหน้าแรก ๆ
         paragraphs = [p.get_text().strip() for p in soup.select("div.mw-parser-output > p") if p.get_text().strip()]
-        summary = " ".join(paragraphs[:3])  # ดึง 3 ย่อหน้าแรก
+        raw_text = " ".join(paragraphs[:3])
 
-        # ✅ ดึงหัวข้อย่อย (TOC)
+        summary = await get_deepseek_response([
+            {"role": "user", "content": f"โปรดสรุปข้อมูลนี้ให้อ่านง่ายโดยใช้ Markdown:\n\n{raw_text}"}
+        ])
+
+        formatted_summary = summary.replace("**-", "\n\n**- ").replace("- ", "\n- ")
+
+        # ✅ Debug หัวข้อที่ดึงมาได้
         toc_list = []
         exclude_list = ["สารบัญ", "หมายเหตุ", "ดูเพิ่ม", "อ้างอิง", "แหล่งข้อมูลอื่น"]
         for heading in soup.select("h2, h3"):
-            heading_text = heading.get_text().strip().replace("[แก้ไข]", "").replace("[edit]", "")
+            heading_text = heading.get_text(strip=True).replace("[แก้ไข]", "").replace("[edit]", "")
             if heading_text and heading_text not in exclude_list:
                 toc_list.append(heading_text)
-                
+
+        logging.info(f"📌 Extracted TOC: {toc_list}")  # ✅ ดูว่ามีหัวข้อจริงไหม
+
         return {
-            "summary": summary if summary else "ไม่สามารถดึงข้อมูลจาก Wikipedia ได้",
+            "summary": formatted_summary if formatted_summary else "ไม่สามารถดึงข้อมูลจาก Wikipedia ได้",
             "toc": toc_list,
             "html": html_content
         }
@@ -137,114 +132,145 @@ async def fetch_wikipedia_content(wiki_url: str) -> Dict[str, str]:
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
 
-    
+
 @app.post("/api/summarize")
 async def summarize(
     input_type: str = Form(...),
-    user_text: str = Form(None),
+    user_text: Optional[str] = Form(None),
     pdf_file: Optional[UploadFile] = File(None),
     wiki_url: Optional[str] = Form(None),
-    session_id: str = Form(None)
+    session_id: Optional[str] = Form(None)
 ):
-    logging.info(f"📩 Received Request - input_type: {input_type}")
+    logging.info(f"📩 Received Request - input_type: {input_type}, session_id: {session_id}")
 
     if not session_id:
         session_id = str(uuid.uuid4())
 
     if session_id not in sessions:
-        sessions[session_id] = {"context": None, "summary": None}
+        sessions[session_id] = {"type": input_type, "data": None, "toc": []}
 
-    article_text = ""
-    toc = []  # ✅ เก็บหัวข้อย่อย
+    summary_text = ""
+    toc = []
 
     if input_type == "text":
         logging.info("📝 Processing Text Input")
-        article_text = user_text or ""
+        if not user_text:
+            raise HTTPException(status_code=400, detail="No text provided.")
+        summary_text = await get_deepseek_response([{"role": "user", "content": f"โปรดสรุปข้อความนี้:\n\n{user_text}"}])
+        sessions[session_id]["data"] = user_text
 
     elif input_type == "pdf":
         logging.info("📄 Processing PDF File")
         if not pdf_file:
             raise HTTPException(status_code=400, detail="No PDF file uploaded.")
-        
-        content = await pdf_file.read()  # ✅ อ่านไฟล์ PDF แค่ครั้งเดียว
-        pdf_toc = extract_pdf_toc(content)  # ✅ ดึง TOC จาก PDF
-        article_text = await extract_text_from_pdf(content)  # ✅ ดึงข้อความจาก PDF
-
-        # ✅ ถ้ามี TOC ให้รวมเข้าไปใน response
-        if pdf_toc:
-            toc = [entry["title"] for entry in pdf_toc]
-            toc_text = "\n".join([f"{entry['title']} (page {entry['page']})" for entry in pdf_toc])
-            article_text = f"🔹 **หัวข้อย่อยใน PDF:**\n{toc_text}\n\n📄 **เนื้อหาจาก PDF:**\n{article_text[:1000]}..."  # ตัดข้อความให้แสดงบางส่วน
+        content = await pdf_file.read()
+        extracted_text = await extract_text_from_pdf(content)
+        summary_text = await get_deepseek_response([
+            {"role": "user", "content": f"โปรดสรุปเนื้อหานี้:\n\n{extracted_text[:2000]}"}  # จำกัดข้อความ
+        ])
+        sessions[session_id]["data"] = extracted_text
 
     elif input_type == "wiki":
         logging.info(f"🌍 Fetching Wikipedia Summary from: {wiki_url}")
         if not wiki_url:
             raise HTTPException(status_code=400, detail="No wiki_url provided.")
-        
-        try:
-            wiki_data = await fetch_wikipedia_content(wiki_url)  # ✅ ดึงข้อมูล Wikipedia
-            article_text = wiki_data["summary"]
-            toc = wiki_data["toc"]
-            html_content = wiki_data["html"]
-            sessions[session_id] = {
-            "wiki_url": wiki_url,
-            "html": html_content,
-            "summary": article_text
-        }
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Error fetching Wikipedia content: {str(e)}")
+        wiki_data = await fetch_wikipedia_content(wiki_url)
+        summary_text = wiki_data["summary"]
+        toc = wiki_data["toc"]
+        sessions[session_id]["data"] = wiki_data["html"]
 
-    else:
-        raise HTTPException(status_code=400, detail="Invalid input_type. Use text/pdf/wiki")
+    sessions[session_id]["toc"] = toc
 
-    if not article_text.strip():
-        raise HTTPException(status_code=400, detail="Extracted text is empty.")
+    return {"session_id": session_id, "summary": summary_text, "toc": toc}
 
-    # ✅ ส่ง summary + TOC กลับไป
-    return {
-        "session_id": session_id,
-        "summary": article_text,
-        "toc": toc
-    }
+from fastapi import Request
+
 @app.post("/api/chat")
-async def chat(
-    session_id: str = Body(...),
-    topic: Optional[str] = Body(None),
-    question: Optional[str] = Body(None)
-):
-    session = sessions.get(session_id)
-    if not session or "html" not in session:
-        raise HTTPException(status_code=400, detail="Session or HTML content not found.")
+async def chat(request: Request):
+    data = await request.json()  # ✅ อ่าน request JSON
+    
+    session_id = data.get("session_id")
+    question = data.get("question")
 
-    html_content = session["html"]
-    soup = BeautifulSoup(html_content, "html.parser")
-    content_div = soup.find("div", {"class": "mw-parser-output"})
+    if not session_id or not question:
+        logging.error("❌ Missing session_id or question!")
+        raise HTTPException(status_code=400, detail="session_id and question are required")
 
-    if topic:
-        target_heading = None
+    logging.info(f"📩 Received /api/chat request - session_id: {session_id}, question: {question}")
+
+    # ✅ ตรวจสอบว่า session มีอยู่หรือไม่
+    if session_id not in sessions:
+        logging.error(f"❌ Session {session_id} not found!")
+        raise HTTPException(status_code=400, detail="Session not found.")
+
+    session = sessions[session_id]
+    input_type = session.get("type")  # 🟢 ตรวจสอบประเภทข้อมูล (text, pdf, wiki)
+    data = session.get("data")  # 🟢 ดึงเนื้อหาที่เคยสรุปไปแล้ว
+
+    if not input_type or not data:
+        logging.error(f"❌ No content found for session {session_id}!")
+        raise HTTPException(status_code=400, detail="No previous content to reference.")
+
+    response_text = ""
+
+    # ✅ ถามต่อเกี่ยวกับข้อความธรรมดา
+    if input_type == "text":
+        response_text = await get_deepseek_response([
+            {"role": "user", "content": f"เกี่ยวกับข้อความที่สรุปไปก่อนหน้านี้:\n\n{data}\n\nคำถาม: {question}"}
+        ])
+
+    # ✅ ถามต่อเกี่ยวกับ PDF
+    elif input_type == "pdf":
+        response_text = await get_deepseek_response([
+            {"role": "user", "content": f"เกี่ยวกับ PDF ที่สรุปไป:\n\n{data[:1000]}...\n\nคำถาม: {question}"}
+        ])
+
+    # ✅ ถามต่อเกี่ยวกับ Wikipedia
+    elif input_type == "wiki":
+        html_content = data  # 🟢 ใช้ HTML ที่ดึงมาจาก Wikipedia
+        soup = BeautifulSoup(html_content, "html.parser")
+        content_div = soup.find("div", {"class": "mw-parser-output"})
+
+        if not content_div:
+            logging.error("❌ Wikipedia content not found in session!")
+            raise HTTPException(status_code=400, detail="Unable to find Wikipedia content.")
+
+        topic_text = ""
         for heading in content_div.find_all(["h2", "h3"]):
-            heading_text = heading.get_text().strip().replace("[แก้ไข]", "").replace("[edit]", "")
-            if heading_text == topic:
-                target_heading = heading
+            heading_text = heading.get_text(strip=True).replace("[แก้ไข]", "").replace("[edit]", "")
+            if heading_text == question:
+                topic_text = " ".join(p.get_text(strip=True) for p in heading.find_next_siblings() if p.name == "p")
                 break
-        else:
-            raise HTTPException(status_code=400, detail="ไม่พบหัวข้อที่เลือกในหน้า Wikipedia")
-
-        content = []
-        for sibling in target_heading.find_next_siblings():
-            if sibling.name in ["h2", "h3"]:
-                break
-            if sibling.name == "p":
-                content.append(sibling.get_text().strip())
-
-        topic_text = " ".join(content).strip()
 
         if not topic_text:
-            topic_text = "ไม่มีเนื้อหาสำหรับหัวข้อนี้"
+            logging.warning(f"⚠️ ไม่พบเนื้อหาสำหรับ '{question}' ใน Wikipedia!")
+            raise HTTPException(status_code=400, detail=f"ไม่พบเนื้อหาสำหรับ '{question}'")
 
-        answer = await get_deepseek_response([{
-            "role": "user",
-            "content": f"โปรดสรุปข้อมูลเกี่ยวกับหัวข้อ '{topic}' ต่อไปนี้:\n\n{topic_text}"
-        }])
+        response_text = await get_deepseek_response([
+            {"role": "user", "content": f"เกี่ยวกับหัวข้อ '{question}':\n\n{topic_text}"}
+        ])
 
-        return {"answer": answer}
+    return {"answer": response_text}
+
+
+
+@app.get("/api/get_session/{session_id}")
+async def get_session(session_id: str):
+    """ ดึงข้อมูล session และ wiki_url """
+    logging.info(f"📌 Checking session_id: {session_id}")
+    logging.info(f"📌 All sessions: {sessions}")
+
+    session = sessions.get(session_id)
+    if not session:
+        logging.warning(f"⚠️ Session {session_id} not found!")
+        raise HTTPException(status_code=404, detail="Session not found")
+
+    wiki_url = session.get("wiki_url", None)
+    logging.info(f"📌 Found session - wiki_url: {wiki_url}")
+
+    return {
+        "session_id": session_id,
+        "wiki_url": wiki_url,
+        "summary": session.get("summary", None),
+        "toc": session.get("toc", [])
+    }

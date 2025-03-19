@@ -321,3 +321,37 @@
   background-color: #e0e0e0;
   transform: scale(1.05);
 }
+
+.markdown-content {
+  font-size: 1.1rem;
+  line-height: 1.8; /* ✅ เพิ่มช่องว่างระหว่างบรรทัด */
+  color: #333;
+  white-space: pre-line;
+}
+
+.markdown-content strong {
+  font-weight: bold;
+  color: #ff9900; /* ✅ เปลี่ยนสีตัวหนาให้เด่นขึ้น */
+}
+
+.markdown-content ul {
+  padding-left: 25px;
+  list-style-type: disc; /* ✅ ใช้ Bullet Points */
+}
+
+.markdown-content li {
+  margin-bottom: 8px; /* ✅ เพิ่มช่องว่างระหว่างรายการ */
+}
+
+.messageAIBox p {
+  margin-bottom: 8px;  /* เพิ่มระยะห่างระหว่างบรรทัด */
+  line-height: 1.8;  /* ทำให้ข้อความอ่านง่ายขึ้น */
+}
+
+.messageAIBox ul {
+  padding-left: 20px;
+}
+
+.messageAIBox li {
+  margin-bottom: 5px;
+}
