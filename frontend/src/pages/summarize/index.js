@@ -333,7 +333,7 @@ const handleSubTopicClick = async (topic) => {
 
             {/* Input Form */}
             <form onSubmit={sessionId ? handleChatSubmit : handleSummarizeSubmit} className={styles.chatInputForm}>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-1 items-center gap-2 flex-row">
                 <FaPaperclip size={30} className="cursor-pointer" style={{ color: "#FF6347" }} onClick={() => document.getElementById("fileInput").click()} />
                 <FaLink size={30} className="cursor-pointer" style={{ color: "#4A90E2" }} onClick={() => setShowLinkInput(true)} />
                 <input

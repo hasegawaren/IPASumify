@@ -56,7 +56,21 @@
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column;
-  height: 82vh; /* Fixed height */
+  height: 82vh;
+}
+
+/* iPad - width: 768px ขึ้นไป */
+@media (max-width: 1024px) {
+  .chatContainer {
+    width: 80%;
+  }
+}
+
+/* Mobile - width: น้อยกว่า 768px */
+@media (max-width: 767px) {
+  .chatContainer {
+    width: 95%;
+  }
 }
 
 /* Chat header */
@@ -125,10 +139,20 @@
   padding: 1.25rem;
   border-top: 1px solid #e4e7eb;
   display: flex;
-  overflow-x: hidden
+  overflow-x: hidden;
+  gap: 0.5rem;
+  flex-direction: row; /* แนวนอนเป็นค่าปกติ */
+}
+
+/* 📱 สำหรับหน้าจอมือถือ (ต่ำกว่า 768px) */
+@media (max-width: 390px) {
+  .chatInputForm {
+    flex-direction: column;
+  }
 }
 
 .chatInput {
+  flex: 1;
   padding: 10px;
   border-radius: 12px;
   border: 1px solid #e4e7eb;
@@ -136,7 +160,8 @@
   outline: none;
   transition: all 0.3s;
   height: 50px;
-  width: 500px; /* This will ensure it expands to fill the space */
+  width: 100%; /* ✅ responsive width */
+  box-sizing: border-box; /* ✅ ป้องกัน padding ทำให้ขนาดบวม */
 }
 
 .submitButton {
@@ -146,9 +171,15 @@
   font-size: 1rem;
   border-radius: 1rem;
   cursor: pointer;
+
   transition: background-color 0.3s;
   min-width: 100px;
   margin-left: auto; /* Push the submit button to the right */
+}
+@media (max-width: 390px) {
+  .submitButton {
+    width: 100%;
+  }
 }
 
 .submitButton:hover {

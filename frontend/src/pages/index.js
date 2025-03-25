@@ -9,8 +9,8 @@ export default function Home() {
   return (
     <div className={styles.container}>
       <Navbar />
-      <div className="flex flex-col md:flex-row items-center justify-center max-w-6xl mx-auto px-6 py-40 pt-46 sticky-content font-sans">
-        <div className="md:w-1/2 space-y-6">
+      <div className="w-full flex flex-col md:flex-row items-center justify-center max-w-6xl mx-auto px-6 py-40 pt-46 sticky-content font-sans">
+        <div className="md:w-1/2 space-y-6 ">
           <h1 className="text-5xl font-bold text-black leading-tight flex items-center">
             {t("homePage.title")}
 
@@ -26,13 +26,13 @@ export default function Home() {
         </div>
 
         <div className="md:w-1/2 flex flex-col items-center space-y-4">
-          <div className="flex space-x-4">
+          <div className="flex-col md:flex-row md:space-x-4 mt-4 md:flex ">
             <Image
               src="/images/ai-summarizer-3.svg"
               alt={t("homePage.example1")}
               width={224}
               height={224}
-              className="rounded-xl object-cover shadow-md bg-gray-300"
+              className="rounded-xl object-cover shadow-md bg-gray-300 mb-4"
             />
             <Image
               src="/images/aisummarypdf.png"
