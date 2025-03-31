@@ -7,7 +7,6 @@ import re
 import httpx
 import os
 import logging
-import tiktoken
 import pdfplumber
 import fitz  
 from PyPDF2 import PdfReader
@@ -30,7 +29,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], 
+    allow_origins=["*"],  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -132,6 +131,9 @@ async def fetch_wikipedia_content(wiki_url: str) -> Dict[str, str]:
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
 
+@app.get("/")
+def read_root():
+    return {"message": "Hello from FastAPI"}
 
 @app.post("/api/summarize")
 async def summarize(
