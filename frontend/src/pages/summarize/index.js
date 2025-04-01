@@ -8,7 +8,9 @@ import styles from "@/styles/Summarize.module.css";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import useTranslation from "next-translate/useTranslation";
 import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm"; 
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
+import rehypeSanitize from "rehype-sanitize";
 
 export default function Summarize() {
   const [file, setFile] = useState(null);
@@ -26,6 +28,14 @@ export default function Summarize() {
   const [selectedTopic, setSelectedTopic] = useState(null);
   const [isTOCVisible, setIsTOCVisible] = useState(false);
   const { t } = useTranslation("common");
+
+  const [inputType, setInputType] = useState(null); // ✅ เพิ่มบรรทัดนี้
+
+  const closePdfViewer = useCallback(() => {
+    setFile(null);
+    setIsPdfOpen(false);
+  }, []);
+
 
   useEffect(() => {
     if (file) {
@@ -66,22 +76,55 @@ export default function Summarize() {
     fetchTOC();
   }, [sessionId, pendingLink]);
 
-  // ✅ ใช้ useCallback ป้องกันการสร้างฟังก์ชันใหม่ทุกครั้ง
-  const handleFileChange = useCallback((event) => {
+  const handleFileChange = useCallback(async (event) => {
     const uploadedFile = event.target.files[0];
     if (uploadedFile && uploadedFile.type === "application/pdf") {
       setFile(uploadedFile);
       setIsPdfOpen(true);
+
+      // ✅ สร้าง FormData เพื่อส่งไปสรุปทันที
+      const formData = new FormData();
+      formData.append("input_type", "pdf");
+      formData.append("pdf_file", uploadedFile);
+      if (sessionId) formData.append("session_id", sessionId);
+
+      // ✅ เพิ่มข้อความในแชทว่าแนบไฟล์ PDF แล้วกำลังสรุป
+      setChatMessages((prev) => [
+        ...prev,
+        { sender: "User", text: uploadedFile.name },
+        { sender: "AI", text: "Processing..." },
+      ]);
+      setLoading(true);
+      setInputType("pdf");
+
+      try {
+        const response = await axios.post("http://localhost:8000/api/summarize", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+
+        const { session_id, summary, toc } = response.data;
+        setSessionId(session_id);
+        setWikiTOC(toc || []);
+
+        setChatMessages((prev) => [
+          ...prev.slice(0, -1),
+          { sender: "AI", text: summary || "ไม่สามารถสรุปเนื้อหา PDF ได้" },
+        ]);
+      } catch (error) {
+        console.error("🔴 Error auto-summarizing PDF:", error);
+        setChatMessages((prev) => [
+          ...prev.slice(0, -1),
+          { sender: "AI", text: "เกิดข้อผิดพลาดในการสรุป PDF" },
+        ]);
+      } finally {
+        setLoading(false);
+      }
     } else {
       setFile(null);
       setIsPdfOpen(false);
     }
-  }, []);
+  }, [sessionId]);
 
-  const closePdfViewer = useCallback(() => {
-    setFile(null);
-    setIsPdfOpen(false);
-  }, []);
 
   const memoizedFileUrl = useMemo(() => fileUrl, [fileUrl]);
 
@@ -89,126 +132,118 @@ export default function Summarize() {
     e.preventDefault();
     if (!chatInput.trim() && !file && !pendingLink) return;
     setLoading(true);
-  
+
+    // แสดงข้อความฝั่งผู้ใช้
+    const userMsg = chatInput || pendingLink || file?.name || "📎 PDF แนบ";
+
+    setChatInput("");
+
+    setChatMessages((prev) => [
+      ...prev,
+      { sender: "User", text: userMsg },
+      { sender: "AI", text: "Processing..." },
+    ]);
+
     const formData = new FormData();
     if (file) {
       formData.append("input_type", "pdf");
       formData.append("pdf_file", file);
+      setInputType("pdf");
     } else if (pendingLink) {
       formData.append("input_type", "wiki");
       formData.append("wiki_url", pendingLink);
+      setInputType("wiki");
     } else {
       formData.append("input_type", "text");
       formData.append("user_text", chatInput);
+      setInputType("text");
     }
-  
+
     if (sessionId) formData.append("session_id", sessionId);
-  
+
     try {
       const response = await axios.post("http://localhost:8000/api/summarize", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-  
+
       console.log("📌 API Response:", response.data);
       const { session_id, summary, toc, wiki_url } = response.data;
-  
-      setSessionId(session_id);  // ✅ ตรวจสอบว่ามี session_id จริง
-      setWikiLink(wiki_url); 
+
+      setSessionId(session_id);
+      setWikiLink(wiki_url);
       setWikiTOC(toc || []);
-  
-      setChatMessages((prev) => [...prev, { sender: "AI", text: summary || "Unable to summarize." }]);
+      setChatMessages((prev) => [
+        ...prev.slice(0, -1),
+        { sender: "AI", text: summary || "ไม่สามารถสรุปเนื้อหาได้" },
+      ]);
     } catch (error) {
       console.error("🔴 Error in summarize:", error);
-      setChatMessages((prev) => [...prev, { sender: "AI", text: "An error occurred while summarizing." }]);
+      setChatMessages((prev) => [
+        ...prev.slice(0, -1),
+        { sender: "AI", text: "เกิดข้อผิดพลาดในการสรุปเนื้อหา" },
+      ]);
     } finally {
       setLoading(false);
       setPendingLink(null);
     }
   };
-  
-const handleSubTopicClick = async (topic) => {
-  console.log("🟢 Clicked topic:", topic);
 
-  if (!sessionId) {
-    console.error("❌ sessionId หายไป!");
-    alert("เกิดข้อผิดพลาด: ไม่พบ sessionId กรุณาลองสรุปเนื้อหาใหม่");
-    return;
-  }
-
-  if (!topic) {
-    console.error("❌ topic เป็นค่าว่าง!");
-    alert("เกิดข้อผิดพลาด: ไม่พบหัวข้อที่เลือก กรุณาลองใหม่");
-    return;
-  }
-
-  console.log("📌 ส่ง request ไปยัง API ด้วยค่า:");
-  console.log("   🔹 sessionId:", sessionId);
-  console.log("   🔹 topic:", topic);
-
-  setSelectedTopic(topic);
-  setLoading(true);
-  setChatMessages((prev) => [...prev, { sender: "User", text: `📌 ขอข้อมูลเพิ่มเติมเกี่ยวกับ: **${topic}**` }]);
-
-  try {
-    const response = await axios.post("http://localhost:8000/api/chat", {
-      session_id: sessionId,
-      topic: topic,
-    });
-
-    console.log("📌 API Response:", response.data);
-
-    setChatMessages((prev) => [
-      ...prev,
-      { sender: "AI", text: response.data.answer || "ไม่มีข้อมูลเพิ่มเติมของหัวข้อนี้" },
-    ]);
-  } catch (error) {
-    console.error("🔴 Error fetching topic details:", error);
-    alert("เกิดข้อผิดพลาดในการดึงข้อมูลของหัวข้อ กรุณาลองใหม่");
-
-    setChatMessages((prev) => [
-      ...prev,
-      { sender: "AI", text: "เกิดข้อผิดพลาดในการดึงข้อมูลของหัวข้อย่อย" },
-    ]);
-  } finally {
-    setLoading(false);
-  }
-};
-
-  
-  // ✅ ฟังก์ชันสำหรับแชทถาม-ตอบต่อจากข้อมูลที่สรุป
   const handleChatSubmit = async (e) => {
     e.preventDefault();
     if (!chatInput.trim()) return;
-  
-    setChatMessages((prev) => [...prev, { sender: "User", text: chatInput }]);
+
+    const userMessage = chatInput;
     setChatInput("");
+
+    setChatMessages((prev) => [
+      ...prev,
+      { sender: "User", text: userMessage },
+      { sender: "AI", text: "Processing..." },
+    ]);
     setLoading(true);
-  
+
     try {
-      const response = await axios.post(
-        sessionId ? "http://localhost:8000/api/chat" : "http://localhost:8000/api/summarize",
-        sessionId ? { session_id: sessionId, question: chatInput } : { user_text: chatInput },
-        { headers: { "Content-Type": "application/json" } }
-      );
-  
-      if (!sessionId) setSessionId(response.data.session_id); // ✅ เซฟ session_id ครั้งแรก
-      setChatMessages((prev) => [...prev, { sender: "AI", text: response.data.summary || response.data.answer }]);
+      if (sessionId) {
+        const response = await axios.post(
+          "http://localhost:8000/api/chat",
+          {
+            session_id: sessionId,
+            question: userMessage,
+            input_type: inputType, // ✅ เพิ่มตรงนี้
+          },
+          { headers: { "Content-Type": "application/json" } }
+        );
+
+        setChatMessages((prev) => [
+          ...prev.slice(0, -1),
+          { sender: "AI", text: response.data.answer || "ไม่พบคำตอบ" },
+        ]);
+      } else {
+        const formData = new FormData();
+        formData.append("input_type", "text");
+        formData.append("user_text", userMessage);
+
+        const response = await axios.post(
+          "http://localhost:8000/api/summarize",
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+
+        setSessionId(response.data.session_id);
+        setInputType("text"); // ✅ เพิ่มไว้ให้จำ inputType
+        setChatMessages((prev) => [
+          ...prev.slice(0, -1),
+          { sender: "AI", text: response.data.summary || "ไม่พบคำตอบ" },
+        ]);
+      }
     } catch (error) {
       console.error("🔴 Error:", error);
-      setChatMessages((prev) => [...prev, { sender: "AI", text: "เกิดข้อผิดพลาดในการสรุปหรือถามต่อ" }]);
+      setChatMessages((prev) => [
+        ...prev.slice(0, -1),
+        { sender: "AI", text: "เกิดข้อผิดพลาดในการสรุปหรือถามต่อ" },
+      ]);
     } finally {
       setLoading(false);
-    }
-  };
-  
-  // ✅ ฟังก์ชันดึงชื่อเรื่องจาก URL
-  const getWikiTitle = (url) => {
-    try {
-      const path = new URL(url).pathname;
-      const title = path.split("/wiki/")[1]?.replace(/_/g, " ");
-      return title || url;
-    } catch (error) {
-      return url;
     }
   };
 
@@ -217,10 +252,18 @@ const handleSubTopicClick = async (topic) => {
     e.preventDefault();
     if (!wikiLink.trim()) return;
 
-    setPendingLink(wikiLink); // เก็บลิงก์ที่รอการสรุป
-    setWikiLink(""); // ล้างช่องอินพุต
-    setShowLinkInput(false); // ปิด modal
-    setLoading(true); // แสดงสถานะ loading
+    setPendingLink(wikiLink);
+    setWikiLink("");
+    setShowLinkInput(false);
+
+    // 🔹 เพิ่มข้อความ "กำลังโหลด..."
+    setChatMessages((prev) => [
+      ...prev,
+      { sender: "User", text: wikiLink },
+      { sender: "AI", text: "Processing..." },
+    ]);
+
+    setLoading(true);
 
     const formData = new FormData();
     formData.append("input_type", "wiki");
@@ -233,13 +276,23 @@ const handleSubTopicClick = async (topic) => {
 
       const { session_id, summary } = response.data;
       setSessionId(session_id);
-      setChatMessages((prev) => [...prev, { sender: "AI", text: summary || "Unable to summarize." }]);
+
+      // 🔹 แทนที่ข้อความ "กำลังโหลด..." ด้วยผลลัพธ์
+      setChatMessages((prev) => [
+        ...prev.slice(0, -1),
+        { sender: "AI", text: summary || "ไม่สามารถสรุปเนื้อหาได้" },
+      ]);
     } catch (error) {
-      setChatMessages((prev) => [...prev, { sender: "AI", text: "An error occurred while summarizing." }]);
+      // 🔹 แทนที่ข้อความ "กำลังโหลด..." ด้วยข้อความ error
+      setChatMessages((prev) => [
+        ...prev.slice(0, -1),
+        { sender: "AI", text: "เกิดข้อผิดพลาดในการสรุปจาก Wikipedia" },
+      ]);
     } finally {
-      setLoading(false);
+      setLoading(false); // ✅ ต้องปิด loading หลังทำงานเสร็จ
     }
   };
+
 
   // ✅ ฟังก์ชันยกเลิกการเพิ่มลิงก์
   const handleCancelLink = () => {
@@ -251,6 +304,16 @@ const handleSubTopicClick = async (topic) => {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [chatMessages]);
+
+  const getWikiTitle = (url) => {
+    try {
+      const path = new URL(url).pathname;
+      const title = path.split("/wiki/")[1]?.replace(/_/g, " ");
+      return title || url;
+    } catch (error) {
+      return url;
+    }
+  };
 
 
   return (
@@ -264,74 +327,42 @@ const handleSubTopicClick = async (topic) => {
               <h2>Sumify Chat</h2>
             </div>
 
-            {pendingLink && (
-              <div className={styles.pendingLinkContainer}>
-                <span className={styles.pendingLinkText}>
-                  Wikipedia: {getWikiTitle(pendingLink)}
-                  <a href={pendingLink} target="_blank" rel="noopener noreferrer" className={styles.openLinkIcon}>
-                    <FaExternalLinkAlt />
-                  </a>
-                </span>
-                <FaTimes className={styles.cancelLinkIcon} onClick={handleCancelLink} />
-              </div>
-            )}
-
-            {Array.isArray(wikiTOC) && wikiTOC.length > 0 && (
-              <div className={styles.tocContainer}>
-                {/* ✅ ปุ่มกดพับ-ขยาย TOC */}
-                <div
-                  className={styles.tocHeader}
-                  onClick={() => setIsTOCVisible(!isTOCVisible)}
-                >
-                  📖 หัวข้อย่อย:
-                  {isTOCVisible ? <FaChevronUp /> : <FaChevronDown />}
-                </div>
-
-                {/* ✅ แสดง TOC เมื่อกดเปิด */}
-                {isTOCVisible && (
-                  <div className={styles.tocList}>
-                    {wikiTOC.map((topic, index) => (
-                      <span
-                        key={`topic-${index}`} // ✅ ให้ key มีความเป็นเอกลักษณ์มากขึ้น
-                        className={styles.tocItem}
-                        onClick={() => handleSubTopicClick(topic)}
-                        title={topic} // ✅ แสดง Tooltip เมื่อ Hover
-                      >
-                        {topic}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
             <div ref={chatContainerRef} className={styles.chatArea}>
-              {loading ? (
-                <div className={styles.loadingText}>
-                  <p className="text-gray-500">Processing...</p>
-                </div>
-              ) : (
-                chatMessages.map((msg, index) => (
-                  <div key={index} className={`${styles.message} ${msg.sender === "User" ? styles.messageUser : styles.messageAI}`}>
-                    <div className={`${styles.messageBox} ${msg.sender === "User" ? styles.messageUserBox : styles.messageAIBox}`}>
-                      {msg.text.startsWith("http") ? (
-                        <a href={msg.text} target="_blank" rel="noopener noreferrer" className={styles.linkText}>
-                          {msg.text}
-                        </a>
-                      ) : msg.text.endsWith(".pdf") ? (
-                        <span className={styles.fileText}>{msg.text}</span>
-                      ) : (
-                        <ReactMarkdown>
+              {chatMessages.map((msg, index) => (
+                <div
+                  key={index}
+                  className={`${styles.message} ${msg.sender === "User" ? styles.messageUser : styles.messageAI
+                    }`}
+                >
+                  <div
+                    className={`${styles.messageBox} ${msg.sender === "User" ? styles.messageUserBox : styles.messageAIBox
+                      }`}
+                  >
+                    {msg.text.startsWith("http") ? (
+                      <a
+                        href={msg.text}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.linkText}
+                      >
                         {msg.text}
-                      </ReactMarkdown>
-                      )}
-                    </div>
+                      </a>
+                    ) : msg.text.endsWith(".pdf") ? (
+                      <span className={styles.fileText}>{msg.text}</span>
+                    ) : msg.text.includes("กำลังโหลด") || msg.text.includes("Processing") ? (
+                      <span className={styles.loadingBubble}>{msg.text}</span>
+                    ) : (
+                      <div className="markdown">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {msg.text}
+                        </ReactMarkdown>
+                      </div>
+                    )}
                   </div>
-                ))
-              )}
+                </div>
+              ))}
             </div>
 
-            {/* Input Form */}
             <form onSubmit={sessionId ? handleChatSubmit : handleSummarizeSubmit} className={styles.chatInputForm}>
               <div className="flex items-center gap-2">
                 <FaPaperclip size={30} className="cursor-pointer" style={{ color: "#FF6347" }} onClick={() => document.getElementById("fileInput").click()} />
@@ -344,10 +375,33 @@ const handleSubTopicClick = async (topic) => {
                   className={styles.chatInput}
                 />
               </div>
-              <button type="submit" className={styles.submitButton}>
-                {sessionId ? t("sumPage.ask_button") : t("sumPage.sum_button")}
-              </button>
+
+              <div className="flex justify-between items-center mt-2">
+                <button type="submit" className={styles.submitButton}>
+                  {sessionId ? t("sumPage.ask_button") : t("sumPage.sum_button")}
+                </button>
+                <button
+                  type="button"
+                  className={styles.clearButton}
+                  onClick={() => {
+                    setChatMessages([]);
+                    setSessionId(null);
+                    setFile(null);
+                    setFileUrl(null);
+                    setWikiLink("");
+                    setPendingLink(null);
+                    setWikiTOC([]);
+                    setSelectedTopic(null);
+                    setInputType(null);
+                    setIsPdfOpen(false);
+                    setChatInput("");
+                  }}
+                >
+                ล้างแชท
+                </button>
+              </div>
             </form>
+
 
             {/* File input for PDF */}
             <input type="file" id="fileInput" accept="application/pdf" onChange={handleFileChange} className={styles.fileInput} style={{ display: "none" }} />
@@ -366,10 +420,10 @@ const handleSubTopicClick = async (topic) => {
                   />
                   <div>
                     <button onClick={handleLinkSubmit} className={styles.submitButton}>
-                    {t("sumPage.dialog_ok")}
+                      {t("sumPage.dialog_ok")}
                     </button>
                     <button onClick={() => setShowLinkInput(false)} className={styles.cancelButton}>
-                    {t("sumPage.dialog_cancel")}
+                      {t("sumPage.dialog_cancel")}
                     </button>
                   </div>
                 </div>

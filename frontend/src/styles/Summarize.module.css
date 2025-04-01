@@ -1,14 +1,13 @@
 .container {
   min-height: 100vh;
-  background-image: url('/images/6.png'); 
-  background-size: cover; 
+  background-image: url('/images/6.png');
+  background-size: cover;
   background-position: center;
-  background-repeat: no-repeat; 
+  background-repeat: no-repeat;
   display: flex;
   flex-direction: column;
 }
 
-/* Center layout when no PDF is uploaded */
 .centerLayout {
   display: flex;
   justify-content: center;
@@ -17,14 +16,12 @@
   width: 100%;
 }
 
-/* Split layout when PDF is uploaded */
 .splitLayout {
   display: flex;
   gap: 2rem;
   height: calc(100vh - 8rem);
 }
 
-/* Content wrapper */
 .content {
   flex-grow: 1;
   padding: 1.5rem;
@@ -37,29 +34,25 @@
   border-radius: 1rem;
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.15);
   padding: 1.5rem;
-  height: 100%; /* Ensures it takes full available height */
-  overflow: hidden; /* Prevent the whole container from scrolling */
+  height: 100%;
+  overflow: hidden;
 }
 
-/* Inner PDF content area styling */
 .pdfViewer .react-pdf__Document {
   height: 100%;
-  overflow-y: auto; /* Enable vertical scrolling only inside the PDF viewer */
+  overflow-y: auto;
 }
 
-
-/* Chat container styling */
 .chatContainer {
-  width: 50%;
+  width: 55%;
   background-color: #ffffff;
   border-radius: 1rem;
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.15);
   display: flex;
   flex-direction: column;
-  height: 82vh; /* Fixed height */
+  height: 82vh;
 }
 
-/* Chat header */
 .chatHeader {
   padding: 1.5rem;
   border-bottom: 1px solid #e4e7eb;
@@ -71,16 +64,14 @@
   color: #4a5568;
 }
 
-/* Chat area with scroll */
 .chatArea {
   flex-grow: 1;
   padding: 1.5rem;
   background-color: #f7fafc;
-  overflow-y: scroll; /* Enable scrolling */
-  max-height: calc(80vh - 150px); /* Adjusting the max-height to allow space for header and input */
+  overflow-y: scroll;
+  max-height: calc(80vh - 150px);
 }
 
-/* Loading state */
 .loadingText {
   display: flex;
   justify-content: center;
@@ -88,7 +79,6 @@
   height: 100%;
 }
 
-/* Message styling */
 .message {
   margin-bottom: 1.25rem;
   display: flex;
@@ -108,7 +98,9 @@
   border-radius: 1rem;
   font-size: 1rem;
   line-height: 1.5;
+  overflow-wrap: anywhere; /* ✅ รองรับตัดคำยาวเช่นลิงก์ */
 }
+
 
 .messageUserBox {
   background-color: #4299e1;
@@ -120,48 +112,34 @@
   color: #2d3748;
 }
 
-
 .chatInputForm {
-  padding: 1.25rem;
-  border-top: 1px solid #e4e7eb;
   display: flex;
-  overflow-x: hidden
+  align-items: center;
+  padding: 1rem;
+  border-top: 1px solid #e4e7eb;
+  gap: 0.75rem;
+  width: 100%;
 }
+
 
 .chatInput {
-  padding: 10px;
+  flex-grow: 1;
+  height: 45px;
+  padding: 0 14px;
   border-radius: 12px;
-  border: 1px solid #e4e7eb;
+  border: 1.5px solid #cbd5e0;
   font-size: 1rem;
-  outline: none;
-  transition: all 0.3s;
-  height: 50px;
-  width: 500px; /* This will ensure it expands to fill the space */
-}
-
-.submitButton {
-  padding: 5px 20px;
-  background-color: #4299e1;
-  color: white;
-  font-size: 1rem;
-  border-radius: 1rem;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  min-width: 100px;
-  margin-left: auto; /* Push the submit button to the right */
-}
-
-.submitButton:hover {
-  background-color: #3182ce;
+  min-width: 0; /* ✅ สำคัญมากเพื่อให้ flex ทำงานกับ input */
 }
 
 .chatInput:focus {
-  border-color: #4299e1;
-  box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.5);
+  border-color: #4A90E2;
+  box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.3);
 }
 
+
 .fileInput {
-  display: none; /* Hide file input */
+  display: none;
 }
 
 .linkModal {
@@ -170,7 +148,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5); /* Dark background */
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -180,10 +158,10 @@
   background-color: white;
   padding: 2rem;
   border-radius: 1rem;
-  width: 400px; /* Set the width of the modal */
-  max-width: 100%; /* Prevent from overflowing */
+  width: 400px;
+  max-width: 100%;
   text-align: center;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* Soft shadow around modal */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
 .linkModalContent h3 {
@@ -210,16 +188,6 @@
   cursor: pointer;
 }
 
-.submitButton {
-  background-color: #4299e1;
-  color: white;
-  border: none;
-}
-
-.submitButton:hover {
-  background-color: #3182ce;
-}
-
 .cancelButton {
   background-color: #e53e3e;
   color: white;
@@ -230,7 +198,6 @@
   background-color: #c53030;
 }
 
-/* Summarize.module.css */
 .pendingLinkContainer {
   display: flex;
   justify-content: space-between;
@@ -268,7 +235,6 @@
   color: #2a6bc1;
 }
 
-/* ✅ ปรับการแสดงผลของ TOC */
 .tocContainer {
   background-color: #f9f9f9;
   padding: 10px;
@@ -278,7 +244,6 @@
   transition: all 0.3s ease-in-out;
 }
 
-/* ✅ ปรับปุ่มพับ-ขยาย */
 .tocHeader {
   display: flex;
   justify-content: space-between;
@@ -295,17 +260,15 @@
   background-color: #d6d6d6;
 }
 
-/* ✅ แสดง TOC เป็น Grid */
 .tocList {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 10px;
-  max-height: 200px; /* ✅ ป้องกันรายการยาวเกินไป */
-  overflow-y: auto; /* ✅ ถ้ามียาว ให้เลื่อนดูได้ */
+  max-height: 200px;
+  overflow-y: auto;
 }
 
-/* ✅ ปรับขนาดและรูปแบบของ TOC */
 .tocItem {
   background-color: #ffffff;
   padding: 8px 14px;
@@ -322,36 +285,81 @@
   transform: scale(1.05);
 }
 
-.markdown-content {
-  font-size: 1.1rem;
-  line-height: 1.8; /* ✅ เพิ่มช่องว่างระหว่างบรรทัด */
-  color: #333;
-  white-space: pre-line;
+.markdown {
+  font-size: 16px;
+  line-height: 1.8;
 }
 
-.markdown-content strong {
+.markdown h1 {
+  font-size: 24px;
+  margin: 1rem 0;
+}
+
+.markdown h2 {
+  font-size: 20px;
+  margin: 1rem 0;
+}
+
+.markdown ul {
+  margin-left: 1.5rem;
+  list-style: disc;
+}
+
+.markdown li {
+  margin-bottom: 0.25rem;
+}
+
+.loadingBubble {
+  animation: pulse 1.5s ease-in-out infinite;
+  color: #718096;
+  font-style: italic;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+}
+
+.submitButton {
+  background-color: #4A90E2;
+  color: white;
+  border: none;
+  padding: 8px 20px;
   font-weight: bold;
-  color: #ff9900; /* ✅ เปลี่ยนสีตัวหนาให้เด่นขึ้น */
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  height: 45px;
 }
 
-.markdown-content ul {
-  padding-left: 25px;
-  list-style-type: disc; /* ✅ ใช้ Bullet Points */
+.submitButton:hover {
+  background-color: #357acc;
 }
 
-.markdown-content li {
-  margin-bottom: 8px; /* ✅ เพิ่มช่องว่างระหว่างรายการ */
+.clearButton {
+  background-color: #f1f1f1;
+  color: #333;
+  border: none;
+  padding: 8px 18px;
+  font-weight: 500;
+  border-radius: 10px;
+  margin-left: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  height: 45px;
 }
 
-.messageAIBox p {
-  margin-bottom: 8px;  /* เพิ่มระยะห่างระหว่างบรรทัด */
-  line-height: 1.8;  /* ทำให้ข้อความอ่านง่ายขึ้น */
+.clearButton:hover {
+  background-color: #dddddd;
 }
 
-.messageAIBox ul {
-  padding-left: 20px;
-}
-
-.messageAIBox li {
-  margin-bottom: 5px;
-}

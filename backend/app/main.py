@@ -29,7 +29,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  
+    allow_origins=["*"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -105,7 +105,7 @@ async def fetch_wikipedia_content(wiki_url: str) -> Dict[str, str]:
         raw_text = " ".join(paragraphs[:3])
 
         summary = await get_deepseek_response([
-            {"role": "user", "content": f"โปรดสรุปข้อมูลนี้ให้อ่านง่ายโดยใช้ Markdown:\n\n{raw_text}"}
+            {"role": "user", "content": f"โปรดสรุปข้อมูลนี้ให้อ่านง่าย\n\n{raw_text}"}
         ])
 
         formatted_summary = summary.replace("**-", "\n\n**- ").replace("- ", "\n- ")
@@ -193,6 +193,7 @@ async def chat(request: Request):
     
     session_id = data.get("session_id")
     question = data.get("question")
+    input_type = data.get("input_type") 
 
     if not session_id or not question:
         logging.error("❌ Missing session_id or question!")
@@ -229,31 +230,15 @@ async def chat(request: Request):
 
     # ✅ ถามต่อเกี่ยวกับ Wikipedia
     elif input_type == "wiki":
-        html_content = data  # 🟢 ใช้ HTML ที่ดึงมาจาก Wikipedia
+        html_content = data
         soup = BeautifulSoup(html_content, "html.parser")
-        content_div = soup.find("div", {"class": "mw-parser-output"})
-
-        if not content_div:
-            logging.error("❌ Wikipedia content not found in session!")
-            raise HTTPException(status_code=400, detail="Unable to find Wikipedia content.")
-
-        topic_text = ""
-        for heading in content_div.find_all(["h2", "h3"]):
-            heading_text = heading.get_text(strip=True).replace("[แก้ไข]", "").replace("[edit]", "")
-            if heading_text == question:
-                topic_text = " ".join(p.get_text(strip=True) for p in heading.find_next_siblings() if p.name == "p")
-                break
-
-        if not topic_text:
-            logging.warning(f"⚠️ ไม่พบเนื้อหาสำหรับ '{question}' ใน Wikipedia!")
-            raise HTTPException(status_code=400, detail=f"ไม่พบเนื้อหาสำหรับ '{question}'")
-
+        paragraphs = [p.get_text().strip() for p in soup.select("div.mw-parser-output > p") if p.get_text().strip()]
+        full_text = " ".join(paragraphs[:15])  # จำกัดเนื้อหา
         response_text = await get_deepseek_response([
-            {"role": "user", "content": f"เกี่ยวกับหัวข้อ '{question}':\n\n{topic_text}"}
+            {"role": "user", "content": f"จากข้อมูล Wikipedia ด้านล่างนี้ ช่วยตอบคำถามต่อไปนี้:\n\nคำถาม: {question}\n\nข้อมูล Wikipedia:\n{full_text}"}
         ])
 
     return {"answer": response_text}
-
 
 
 @app.get("/api/get_session/{session_id}")
