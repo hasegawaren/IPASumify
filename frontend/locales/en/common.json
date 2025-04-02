@@ -27,6 +27,7 @@
     "chatbox2": "Ask a question about the summary...",
     "sum_button": "summarize",
     "ask_button": "Ask",
+    "clean_button" : "Clean Chat",
     "dialog_title": "Enter the Wikipedia Link:",
     "dialog_input": "Enter URL",
     "dialog_ok": "Submit Link",

@@ -25,17 +25,9 @@ export default function Summarize() {
   const [isPdfOpen, setIsPdfOpen] = useState(false);
   const [sessionId, setSessionId] = useState(null);
   const [wikiTOC, setWikiTOC] = useState([]);
-  const [selectedTopic, setSelectedTopic] = useState(null);
-  const [isTOCVisible, setIsTOCVisible] = useState(false);
-  const { t } = useTranslation("common");
-
-  const [inputType, setInputType] = useState(null); // ✅ เพิ่มบรรทัดนี้
-
-  const closePdfViewer = useCallback(() => {
-    setFile(null);
-    setIsPdfOpen(false);
-  }, []);
-
+  const { t, lang } = useTranslation("common");
+  const [inputType, setInputType] = useState(null);
+  const memoizedFileUrl = useMemo(() => fileUrl, [fileUrl]);
 
   useEffect(() => {
     if (file) {
@@ -48,28 +40,27 @@ export default function Summarize() {
   }, [file]);
 
   useEffect(() => {
-    console.log("📌 Updated TOC in UI:", wikiTOC);
+    console.log("Updated TOC in UI:", wikiTOC);
   }, [wikiTOC]);
 
-  // ✅ ดึง TOC หลังจากที่มี sessionId แล้ว
   useEffect(() => {
-    if (!sessionId || !pendingLink) return; // ✅ ต้องมี sessionId และ wiki_url
+    if (!sessionId || !pendingLink) return;
 
     const fetchTOC = async () => {
       const formData = new FormData();
       formData.append("input_type", "wiki");
       formData.append("session_id", sessionId);
-      formData.append("wiki_url", pendingLink); // ✅ ใช้ค่า wiki_url ที่ถูกต้อง
+      formData.append("wiki_url", pendingLink);
 
       try {
         const response = await axios.post("http://localhost:8000/api/summarize", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
 
-        console.log("📌 Fetched TOC:", response.data.toc);
+        console.log(" Fetched TOC:", response.data.toc);
         setWikiTOC(response.data.toc || []);
       } catch (error) {
-        console.error("🔴 Error fetching TOC:", error);
+        console.error("Error fetching TOC:", error);
       }
     };
 
@@ -82,13 +73,12 @@ export default function Summarize() {
       setFile(uploadedFile);
       setIsPdfOpen(true);
 
-      // ✅ สร้าง FormData เพื่อส่งไปสรุปทันที
       const formData = new FormData();
       formData.append("input_type", "pdf");
       formData.append("pdf_file", uploadedFile);
+      formData.append("language", lang);
       if (sessionId) formData.append("session_id", sessionId);
 
-      // ✅ เพิ่มข้อความในแชทว่าแนบไฟล์ PDF แล้วกำลังสรุป
       setChatMessages((prev) => [
         ...prev,
         { sender: "User", text: uploadedFile.name },
@@ -111,7 +101,7 @@ export default function Summarize() {
           { sender: "AI", text: summary || "ไม่สามารถสรุปเนื้อหา PDF ได้" },
         ]);
       } catch (error) {
-        console.error("🔴 Error auto-summarizing PDF:", error);
+        console.error("Error auto-summarizing PDF:", error);
         setChatMessages((prev) => [
           ...prev.slice(0, -1),
           { sender: "AI", text: "เกิดข้อผิดพลาดในการสรุป PDF" },
@@ -125,15 +115,11 @@ export default function Summarize() {
     }
   }, [sessionId]);
 
-
-  const memoizedFileUrl = useMemo(() => fileUrl, [fileUrl]);
-
   const handleSummarizeSubmit = async (e) => {
     e.preventDefault();
     if (!chatInput.trim() && !file && !pendingLink) return;
     setLoading(true);
 
-    // แสดงข้อความฝั่งผู้ใช้
     const userMsg = chatInput || pendingLink || file?.name || "📎 PDF แนบ";
 
     setChatInput("");
@@ -148,14 +134,17 @@ export default function Summarize() {
     if (file) {
       formData.append("input_type", "pdf");
       formData.append("pdf_file", file);
+      formData.append("language", lang);
       setInputType("pdf");
     } else if (pendingLink) {
       formData.append("input_type", "wiki");
       formData.append("wiki_url", pendingLink);
+      formData.append("language", lang);
       setInputType("wiki");
     } else {
       formData.append("input_type", "text");
       formData.append("user_text", chatInput);
+      formData.append("language", lang);
       setInputType("text");
     }
 
@@ -209,7 +198,8 @@ export default function Summarize() {
           {
             session_id: sessionId,
             question: userMessage,
-            input_type: inputType, // ✅ เพิ่มตรงนี้
+            input_type: inputType,
+            language: lang,
           },
           { headers: { "Content-Type": "application/json" } }
         );
@@ -230,7 +220,7 @@ export default function Summarize() {
         );
 
         setSessionId(response.data.session_id);
-        setInputType("text"); // ✅ เพิ่มไว้ให้จำ inputType
+        setInputType("text");
         setChatMessages((prev) => [
           ...prev.slice(0, -1),
           { sender: "AI", text: response.data.summary || "ไม่พบคำตอบ" },
@@ -247,7 +237,6 @@ export default function Summarize() {
     }
   };
 
-  // ✅ ฟังก์ชันส่ง Wikipedia Link เพื่อพักไว้ด้านบน
   const handleLinkSubmit = async (e) => {
     e.preventDefault();
     if (!wikiLink.trim()) return;
@@ -255,8 +244,6 @@ export default function Summarize() {
     setPendingLink(wikiLink);
     setWikiLink("");
     setShowLinkInput(false);
-
-    // 🔹 เพิ่มข้อความ "กำลังโหลด..."
     setChatMessages((prev) => [
       ...prev,
       { sender: "User", text: wikiLink },
@@ -268,7 +255,7 @@ export default function Summarize() {
     const formData = new FormData();
     formData.append("input_type", "wiki");
     formData.append("wiki_url", wikiLink);
-
+    formData.append("language", lang);
     try {
       const response = await axios.post("http://localhost:8000/api/summarize", formData, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -276,45 +263,30 @@ export default function Summarize() {
 
       const { session_id, summary } = response.data;
       setSessionId(session_id);
-
-      // 🔹 แทนที่ข้อความ "กำลังโหลด..." ด้วยผลลัพธ์
       setChatMessages((prev) => [
         ...prev.slice(0, -1),
         { sender: "AI", text: summary || "ไม่สามารถสรุปเนื้อหาได้" },
       ]);
     } catch (error) {
-      // 🔹 แทนที่ข้อความ "กำลังโหลด..." ด้วยข้อความ error
       setChatMessages((prev) => [
         ...prev.slice(0, -1),
         { sender: "AI", text: "เกิดข้อผิดพลาดในการสรุปจาก Wikipedia" },
       ]);
     } finally {
-      setLoading(false); // ✅ ต้องปิด loading หลังทำงานเสร็จ
+      setLoading(false);
     }
   };
-
-
-  // ✅ ฟังก์ชันยกเลิกการเพิ่มลิงก์
-  const handleCancelLink = () => {
-    setPendingLink(null);
-  };
-
-  useEffect(() => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-    }
-  }, [chatMessages]);
 
   const getWikiTitle = (url) => {
     try {
       const path = new URL(url).pathname;
-      const title = path.split("/wiki/")[1]?.replace(/_/g, " ");
-      return title || url;
+      const encodedTitle = path.split("/wiki/")[1];
+      const decodedTitle = decodeURIComponent(encodedTitle.replace(/_/g, " "));
+      return decodedTitle || url;
     } catch (error) {
       return url;
     }
   };
-
 
   return (
     <div className={styles.container}>
@@ -339,14 +311,26 @@ export default function Summarize() {
                       }`}
                   >
                     {msg.text.startsWith("http") ? (
-                      <a
-                        href={msg.text}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.linkText}
-                      >
-                        {msg.text}
-                      </a>
+                      <div className="markdown">
+                        <strong>Wikipedia เรื่อง :</strong> {getWikiTitle(msg.text)}<br />
+                        <strong>ที่มา :</strong>{" "}
+                        <a
+                          href={msg.text}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            color: "#ffffff",
+                            textDecoration: "underline",
+                            fontWeight: "bold",
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "6px"
+                          }}
+                        >
+                          กดที่นี่ <FaExternalLinkAlt size={12} />
+                        </a>
+                      </div>
+
                     ) : msg.text.endsWith(".pdf") ? (
                       <span className={styles.fileText}>{msg.text}</span>
                     ) : msg.text.includes("กำลังโหลด") || msg.text.includes("Processing") ? (
@@ -364,9 +348,11 @@ export default function Summarize() {
             </div>
 
             <form onSubmit={sessionId ? handleChatSubmit : handleSummarizeSubmit} className={styles.chatInputForm}>
-              <div className="flex items-center gap-2">
-                <FaPaperclip size={30} className="cursor-pointer" style={{ color: "#FF6347" }} onClick={() => document.getElementById("fileInput").click()} />
-                <FaLink size={30} className="cursor-pointer" style={{ color: "#4A90E2" }} onClick={() => setShowLinkInput(true)} />
+              <div className={`${styles.inputRow}`}>
+                <div className={styles.iconGroup}>
+                  <FaPaperclip size={30} className="cursor-pointer" style={{ color: "#FF6347" }} onClick={() => document.getElementById("fileInput").click()} />
+                  <FaLink size={30} className="cursor-pointer" style={{ color: "#4A90E2" }} onClick={() => setShowLinkInput(true)} />
+                </div>
                 <input
                   type="text"
                   value={chatInput}
@@ -397,7 +383,7 @@ export default function Summarize() {
                     setChatInput("");
                   }}
                 >
-                ล้างแชท
+                  {t("sumPage.clean_button")}
                 </button>
               </div>
             </form>
@@ -434,7 +420,6 @@ export default function Summarize() {
           {/* PDF Viewer */}
           {memoizedFileUrl && (
             <div className={styles.pdfViewer}>
-              <FaTimes className="cursor-pointer" size={20} onClick={closePdfViewer} />
               <Worker workerUrl={`https://unpkg.com/pdfjs-dist@2.16.105/build/pdf.worker.min.js`}>
                 <Viewer fileUrl={memoizedFileUrl} />
               </Worker>

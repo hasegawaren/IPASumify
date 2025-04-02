@@ -26,6 +26,7 @@
     "chatbox1": "ป้อนข้อความ อัปโหลดไฟล์ PDF หรือให้เว็บไซต์ Wikipedia...",
     "chatbox2": "ถามคำถามเพื่อสรุปเนื้อหา...",
     "sum_button": "สรุป",
+    "clean_button" : "ล้างแชท",
     "ask_button": "ถาม",
     "dialog_title": "ใส่ลิงก์ Wikipedia:",
     "dialog_input": "ใส่ URL",

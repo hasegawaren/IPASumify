@@ -89,7 +89,7 @@ async def get_deepseek_response(messages: List[Dict[str, str]]) -> str:
                 await asyncio.sleep(3)
             else:
                 raise HTTPException(status_code=500, detail=f"DeepSeek API error: {e.response.text}")
-async def fetch_wikipedia_content(wiki_url: str) -> Dict[str, str]:
+async def fetch_wikipedia_content(wiki_url: str, language: str = "th") -> Dict[str, str]:
     """ 🔹 ดึงข้อมูลจาก Wikipedia พร้อมหัวข้อย่อย (TOC) """
     try:
         logging.info(f"🌍 Fetching Wikipedia URL: {wiki_url}")
@@ -100,29 +100,17 @@ async def fetch_wikipedia_content(wiki_url: str) -> Dict[str, str]:
             html_content = response.text
 
         soup = BeautifulSoup(html_content, "html.parser")
-
         paragraphs = [p.get_text().strip() for p in soup.select("div.mw-parser-output > p") if p.get_text().strip()]
         raw_text = " ".join(paragraphs[:3])
+        prompt = "Please summarize this into easy-to-read English." if language == "en" else "โปรดสรุปข้อมูลนี้ให้อ่านง่าย"
 
         summary = await get_deepseek_response([
-            {"role": "user", "content": f"โปรดสรุปข้อมูลนี้ให้อ่านง่าย\n\n{raw_text}"}
+            {"role": "user", "content": f"{prompt}\n\n{raw_text}"}
         ])
-
         formatted_summary = summary.replace("**-", "\n\n**- ").replace("- ", "\n- ")
-
-        # ✅ Debug หัวข้อที่ดึงมาได้
-        toc_list = []
-        exclude_list = ["สารบัญ", "หมายเหตุ", "ดูเพิ่ม", "อ้างอิง", "แหล่งข้อมูลอื่น"]
-        for heading in soup.select("h2, h3"):
-            heading_text = heading.get_text(strip=True).replace("[แก้ไข]", "").replace("[edit]", "")
-            if heading_text and heading_text not in exclude_list:
-                toc_list.append(heading_text)
-
-        logging.info(f"📌 Extracted TOC: {toc_list}")  # ✅ ดูว่ามีหัวข้อจริงไหม
 
         return {
             "summary": formatted_summary if formatted_summary else "ไม่สามารถดึงข้อมูลจาก Wikipedia ได้",
-            "toc": toc_list,
             "html": html_content
         }
 
@@ -141,7 +129,8 @@ async def summarize(
     user_text: Optional[str] = Form(None),
     pdf_file: Optional[UploadFile] = File(None),
     wiki_url: Optional[str] = Form(None),
-    session_id: Optional[str] = Form(None)
+    session_id: Optional[str] = Form(None),
+    language: Optional[str] = Form("th")
 ):
     logging.info(f"📩 Received Request - input_type: {input_type}, session_id: {session_id}")
 
@@ -158,7 +147,8 @@ async def summarize(
         logging.info("📝 Processing Text Input")
         if not user_text:
             raise HTTPException(status_code=400, detail="No text provided.")
-        summary_text = await get_deepseek_response([{"role": "user", "content": f"โปรดสรุปข้อความนี้:\n\n{user_text}"}])
+        prompt = f"Please summarize this text:\n\n{user_text}" if language == "en" else f"โปรดสรุปข้อความนี้:\n\n{user_text}"
+        summary_text = await get_deepseek_response([{"role": "user", "content": prompt}])
         sessions[session_id]["data"] = user_text
 
     elif input_type == "pdf":
@@ -168,7 +158,7 @@ async def summarize(
         content = await pdf_file.read()
         extracted_text = await extract_text_from_pdf(content)
         summary_text = await get_deepseek_response([
-            {"role": "user", "content": f"โปรดสรุปเนื้อหานี้:\n\n{extracted_text[:2000]}"}  # จำกัดข้อความ
+        {"role": "user", "content": f"{'Please summarize this content:' if language == 'en' else 'โปรดสรุปเนื้อหานี้:'}\n\n{extracted_text[:2000]}"}
         ])
         sessions[session_id]["data"] = extracted_text
 
@@ -176,7 +166,7 @@ async def summarize(
         logging.info(f"🌍 Fetching Wikipedia Summary from: {wiki_url}")
         if not wiki_url:
             raise HTTPException(status_code=400, detail="No wiki_url provided.")
-        wiki_data = await fetch_wikipedia_content(wiki_url)
+        wiki_data = await fetch_wikipedia_content(wiki_url, language=language)
         summary_text = wiki_data["summary"]
         toc = wiki_data["toc"]
         sessions[session_id]["data"] = wiki_data["html"]
@@ -189,54 +179,66 @@ from fastapi import Request
 
 @app.post("/api/chat")
 async def chat(request: Request):
-    data = await request.json()  # ✅ อ่าน request JSON
+    data = await request.json()
     
     session_id = data.get("session_id")
     question = data.get("question")
     input_type = data.get("input_type") 
+    language = data.get("language", "th")
 
     if not session_id or not question:
-        logging.error("❌ Missing session_id or question!")
+        logging.error("Missing session_id or question!")
         raise HTTPException(status_code=400, detail="session_id and question are required")
 
-    logging.info(f"📩 Received /api/chat request - session_id: {session_id}, question: {question}")
+    logging.info(f"Received /api/chat request - session_id: {session_id}, question: {question}")
 
-    # ✅ ตรวจสอบว่า session มีอยู่หรือไม่
     if session_id not in sessions:
-        logging.error(f"❌ Session {session_id} not found!")
+        logging.error(f"Session {session_id} not found!")
         raise HTTPException(status_code=400, detail="Session not found.")
 
     session = sessions[session_id]
-    input_type = session.get("type")  # 🟢 ตรวจสอบประเภทข้อมูล (text, pdf, wiki)
-    data = session.get("data")  # 🟢 ดึงเนื้อหาที่เคยสรุปไปแล้ว
+    input_type = session.get("type")
+    data = session.get("data") 
 
     if not input_type or not data:
-        logging.error(f"❌ No content found for session {session_id}!")
+        logging.error(f"No content found for session {session_id}!")
         raise HTTPException(status_code=400, detail="No previous content to reference.")
 
     response_text = ""
 
-    # ✅ ถามต่อเกี่ยวกับข้อความธรรมดา
     if input_type == "text":
         response_text = await get_deepseek_response([
-            {"role": "user", "content": f"เกี่ยวกับข้อความที่สรุปไปก่อนหน้านี้:\n\n{data}\n\nคำถาม: {question}"}
-        ])
+        {
+            "role": "user",
+            "content": f"Based on the previously summarized text:\n\n{data}\n\nQuestion: {question}"
+            if language == "en"
+            else f"เกี่ยวกับข้อความที่สรุปไปก่อนหน้านี้:\n\n{data}\n\nคำถาม: {question}"
+        }
+    ])
 
-    # ✅ ถามต่อเกี่ยวกับ PDF
     elif input_type == "pdf":
         response_text = await get_deepseek_response([
-            {"role": "user", "content": f"เกี่ยวกับ PDF ที่สรุปไป:\n\n{data[:1000]}...\n\nคำถาม: {question}"}
-        ])
+        {
+            "role": "user",
+            "content": f"Based on the summarized PDF:\n\n{data[:1000]}...\n\nQuestion: {question}"
+            if language == "en"
+            else f"เกี่ยวกับ PDF ที่สรุปไป:\n\n{data[:1000]}...\n\nคำถาม: {question}"
+        }
+    ])
 
-    # ✅ ถามต่อเกี่ยวกับ Wikipedia
     elif input_type == "wiki":
         html_content = data
         soup = BeautifulSoup(html_content, "html.parser")
         paragraphs = [p.get_text().strip() for p in soup.select("div.mw-parser-output > p") if p.get_text().strip()]
-        full_text = " ".join(paragraphs[:15])  # จำกัดเนื้อหา
+        full_text = " ".join(paragraphs[:15])
         response_text = await get_deepseek_response([
-            {"role": "user", "content": f"จากข้อมูล Wikipedia ด้านล่างนี้ ช่วยตอบคำถามต่อไปนี้:\n\nคำถาม: {question}\n\nข้อมูล Wikipedia:\n{full_text}"}
-        ])
+        {
+            "role": "user",
+            "content": f"Please answer the following question using this Wikipedia content:\n\nQuestion: {question}\n\nWikipedia Content:\n{full_text}"
+            if language == "en"
+            else f"ช่วยตอบคำถามต่อไปนี้ โดยหาจากใน Wikipedia ที่ให้ไป:\n\nคำถาม: {question}\n\nข้อมูล Wikipedia:\n{full_text}"
+        }
+    ])
 
     return {"answer": response_text}
 

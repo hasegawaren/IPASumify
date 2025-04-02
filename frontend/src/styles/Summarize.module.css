@@ -98,7 +98,7 @@
   border-radius: 1rem;
   font-size: 1rem;
   line-height: 1.5;
-  overflow-wrap: anywhere; /* ✅ รองรับตัดคำยาวเช่นลิงก์ */
+  overflow-wrap: anywhere;
 }
 
 
@@ -119,18 +119,18 @@
   border-top: 1px solid #e4e7eb;
   gap: 0.75rem;
   width: 100%;
+  flex-wrap: nowrap;
 }
 
-
 .chatInput {
-  flex-grow: 1;
+  flex: 1;
   height: 45px;
   padding: 0 14px;
   border-radius: 12px;
   border: 1.5px solid #cbd5e0;
   font-size: 1rem;
-  min-width: 0; /* ✅ สำคัญมากเพื่อให้ flex ทำงานกับ input */
 }
+
 
 .chatInput:focus {
   border-color: #4A90E2;
@@ -334,12 +334,13 @@
   background-color: #4A90E2;
   color: white;
   border: none;
-  padding: 8px 20px;
+  padding: 8px 18px;
   font-weight: bold;
-  border-radius: 10px;
+  border-radius: 12px;
   cursor: pointer;
   transition: background-color 0.2s ease;
   height: 45px;
+  margin-bottom: 10px;       
 }
 
 .submitButton:hover {
@@ -348,18 +349,74 @@
 
 .clearButton {
   background-color: #f1f1f1;
-  color: #333;
+  font-weight: bold;
+  color: #ff4848;
   border: none;
   padding: 8px 18px;
   font-weight: 500;
-  border-radius: 10px;
+  border-radius: 12px;
   margin-left: 8px;
   cursor: pointer;
   transition: background-color 0.2s ease;
   height: 45px;
+  white-space: nowrap;      
+  min-width: 100px;   
+  margin-bottom: 10px;       
 }
+
 
 .clearButton:hover {
   background-color: #dddddd;
 }
 
+.inputRow {
+  display: flex;
+  align-items: stretch;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.iconGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+}
+
+@media (max-width: 768px) {
+  .chatContainer {
+    width: 100%;
+    height: auto;
+    margin-bottom: 1rem;
+  }
+
+  .pdfViewer {
+    width: 100%;
+    height: auto;
+    padding: 1rem;
+  }
+
+  .splitLayout {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .chatInputForm {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .chatInput {
+    width: 100%;
+  }
+
+  .submitButton, .clearButton {
+    width: 100%;
+  }
+
+  .tocList {
+    flex-direction: column;
+    max-height: none;
+  }
+}
