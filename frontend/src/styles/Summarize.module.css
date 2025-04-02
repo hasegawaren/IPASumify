@@ -414,6 +414,9 @@
     height: 44px;
   }
 
+  .chatInputForm {
+    flex-wrap: wrap;  
+  }
 
   .submitButton,
   .clearButton {
@@ -434,3 +437,28 @@
   }
 }
 
+@media (max-width: 1024px) {
+  .chatInputForm {
+    flex-direction: column;   /* ✅ Stack แนวตั้งในแท็บเล็ต */
+    align-items: stretch;
+  }
+
+  .chatInput {
+    width: 100%;
+    font-size: 1rem;
+    height: 44px;
+  }
+
+  .submitButton,
+  .clearButton {
+    width: 100%;
+    font-size: 1rem;
+    height: 44px;
+  }
+
+  .iconGroup {
+    justify-content: flex-start;
+    margin-bottom: 0.5rem;
+    gap: 1rem;
+  }
+}
