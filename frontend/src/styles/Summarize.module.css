@@ -432,14 +432,20 @@
     margin-bottom: 0.5rem;
   }
 
-  .chatArea {
-    max-height: 60vh;
+  .chatContainer {
+    width: 90%;
+    background-color: #ffffff;
+    border-radius: 1rem;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    height: 82vh;
   }
 }
 
 @media (max-width: 1024px) {
   .chatInputForm {
-    flex-direction: column;   /* ✅ Stack แนวตั้งในแท็บเล็ต */
+    flex-direction: column;   
     align-items: stretch;
   }
 
@@ -460,5 +466,14 @@
     justify-content: flex-start;
     margin-bottom: 0.5rem;
     gap: 1rem;
+  }
+
+  .chatContainer {
+    background-color: #ffffff;
+    border-radius: 1rem;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    height: 82vh;
   }
 }
