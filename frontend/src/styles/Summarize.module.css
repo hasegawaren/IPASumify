@@ -405,18 +405,32 @@
   .chatInputForm {
     flex-direction: column;
     align-items: stretch;
+    gap: 0.75rem;
   }
 
   .chatInput {
     width: 100%;
+    font-size: 1rem;
+    height: 44px;
   }
 
-  .submitButton, .clearButton {
+
+  .submitButton,
+  .clearButton {
     width: 100%;
+    height: 44px;
+    font-size: 1rem;
   }
 
-  .tocList {
-    flex-direction: column;
-    max-height: none;
+  .iconGroup {
+    display: flex;
+    justify-content: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .chatArea {
+    max-height: 60vh;
   }
 }
+
