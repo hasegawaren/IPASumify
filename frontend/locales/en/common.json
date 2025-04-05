@@ -29,8 +29,11 @@
     "ask_button": "Ask",
     "clean_button" : "Clean Chat",
     "dialog_title": "Enter the Wikipedia Link:",
+    "wiki_topic" :"Wikipedia Topic",
+    "wiki_source": "Source",
     "dialog_input": "Enter URL",
     "dialog_ok": "Submit Link",
-    "dialog_cancel": "Cancel"
+    "dialog_cancel": "Cancel",
+    "click_here": "Click Here"
   }
 }

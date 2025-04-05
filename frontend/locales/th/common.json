@@ -29,9 +29,12 @@
     "clean_button" : "ล้างแชท",
     "ask_button": "ถาม",
     "dialog_title": "ใส่ลิงก์ Wikipedia:",
+    "wiki_topic" :"Wikipedia เรื่อง",
+    "wiki_source": "ที่มา",
     "dialog_input": "ใส่ URL",
     "dialog_ok": "ยืนยันลิงก์",
-    "dialog_cancel": "ยกเลิก"
+    "dialog_cancel": "ยกเลิก",
+    "click_here": "กดที่นี่"
   }
 }
   

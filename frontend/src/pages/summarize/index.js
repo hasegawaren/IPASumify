@@ -312,8 +312,8 @@ export default function Summarize() {
                   >
                     {msg.text.startsWith("http") ? (
                       <div className="markdown">
-                        <strong>Wikipedia เรื่อง :</strong> {getWikiTitle(msg.text)}<br />
-                        <strong>ที่มา :</strong>{" "}
+                        <strong>{t("sumPage.wiki_topic")} :</strong> {getWikiTitle(msg.text)}<br />
+                        <strong>{t("sumPage.wiki_source")}  :</strong>{" "}
                         <a
                           href={msg.text}
                           target="_blank"
@@ -327,7 +327,7 @@ export default function Summarize() {
                             gap: "6px"
                           }}
                         >
-                          กดที่นี่ <FaExternalLinkAlt size={12} />
+                         {t("sumPage.click_here")} <FaExternalLinkAlt size={12} />
                         </a>
                       </div>
 
@@ -376,18 +376,18 @@ export default function Summarize() {
                     setFileUrl(null);
                     setWikiLink("");
                     setPendingLink(null);
-                    setWikiTOC([]);
-                    setSelectedTopic(null);
                     setInputType(null);
                     setIsPdfOpen(false);
                     setChatInput("");
+
+                    const input = document.getElementById("fileInput");
+                    if (input) input.value = "";
                   }}
                 >
                   {t("sumPage.clean_button")}
                 </button>
               </div>
             </form>
-
 
             {/* File input for PDF */}
             <input type="file" id="fileInput" accept="application/pdf" onChange={handleFileChange} className={styles.fileInput} style={{ display: "none" }} />
