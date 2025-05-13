@@ -1,24 +1,22 @@
-ตั้งค่า Backend (FastAPI):
-   ```bash
-   cd backend
-   python -m venv .venv            # สร้าง Virtual Environment
-   source .venv/bin/activate       # สำหรับ macOS/Linux
-   .\.venv\Scripts\activate        # สำหรับ Windows
-   .\.venv\Scripts\Activate.ps1    # สำหรับ PowerShell
-   pip install -r requirements.txt # ติดตั้ง Dependencies
-   uvicorn app.main:app --reload   # รันเซิร์ฟเวอร์
-   ```
+# Sumify: AI-Powered Content Summarization
 
-ตั้งค่า Frontend (Next.js):
-   ```bash
-   cd frontend
-   npm install                     # ติดตั้ง Dependencies
-   npm run dev                     # รันเซิร์ฟเวอร์
-   ```
+A full-stack web app that summarizes content from PDFs, Wikipedia, or user input  
+with follow-up Q&A using DeepSeek and FastAPI.
 
-เข้าถึงระบบ:
-Frontend: http://localhost:3000
-(สำหรับการใช้งานหน้าเว็บของระบบ)
-Backend (Swagger API): http://localhost:8000/docs
-(สำหรับตรวจสอบและทดสอบ API ผ่าน Swagger UI)
+## Features
+- Upload PDF and get a summary with topic outlines
+- Summarize Wikipedia articles via URL
+- Interactive Q&A in Thai and English
+- Beautiful, responsive UI (built with Tailwind CSS)
+
+## Tech Stack
+Frontend: Next.js, Tailwind CSS  
+Backend: FastAPI (Python), DeepSeek API  
+Deploy: Vercel (Frontend), Railway (Backend)
+
+## Getting Started
+```bash
+git clone https://github.com/hasegawaren/sumify
+cd sumify
+npm install && npm run dev
 
