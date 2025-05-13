@@ -62,7 +62,8 @@ As both **Project Manager** and **Developer**, I was responsible for:
 - Managed sprint goals and feature timeline until deployment
 
 Example Project Timeline in Notion:
-![Project Planning](![image](https://github.com/user-attachments/assets/b59c49c6-b960-459c-a708-50fae64df7cb))
+![image](https://github.com/user-attachments/assets/03fe227b-2d5e-4aad-8c4e-4fe457b8cc9e)
+
 
 **Development Responsibilities**
 - Designed and developed the **entire frontend** using Next.js and Tailwind CSS
