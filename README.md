@@ -2,6 +2,8 @@
 
 A full-stack web app that summarizes content from PDFs, Wikipedia, or user input  
 with follow-up Q&A using DeepSeek and FastAPI.
+![image](https://github.com/user-attachments/assets/c42d6b39-0984-4a0b-bddf-445b8afb6068)
+
 ![image](https://github.com/user-attachments/assets/e97617b8-ed7f-4cc6-9d6f-1185b6314e38)
 
 
@@ -17,8 +19,6 @@ with follow-up Q&A using DeepSeek and FastAPI.
 - Interactive Q&A in Thai and English
 ![image](https://github.com/user-attachments/assets/e233fb1d-4fd1-456d-8dfd-89bc8172a21f)
 ![image](https://github.com/user-attachments/assets/a8c40875-f59b-4f4c-809b-75665e7fb5ac)
-
-- Beautiful, responsive UI (built with Tailwind CSS)
 
 ## Tech Stack
 Frontend: Next.js, Tailwind CSS  
