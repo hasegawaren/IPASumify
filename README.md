@@ -63,7 +63,6 @@ As both **Project Manager** and **Developer**, I was responsible for:
 
 Example Project Timeline in Notion:
 ![Project Planning](![image](https://github.com/user-attachments/assets/b59c49c6-b960-459c-a708-50fae64df7cb)
-)
 
 **Development Responsibilities**
 - Designed and developed the **entire frontend** using Next.js and Tailwind CSS
