@@ -1,9 +1,8 @@
 # Sumify: AI-Powered Content Summarization
 
-A full-stack web app that summarizes content from PDFs, Wikipedia, or user input  
-with follow-up Q&A using DeepSeek and FastAPI.
-![image](https://github.com/user-attachments/assets/c42d6b39-0984-4a0b-bddf-445b8afb6068)
+A full-stack web app that summarizes content from PDFs, Wikipedia, or user input with follow-up Q&A using DeepSeek and FastAPI.
 
+![image](https://github.com/user-attachments/assets/c42d6b39-0984-4a0b-bddf-445b8afb6068)
 ![image](https://github.com/user-attachments/assets/e97617b8-ed7f-4cc6-9d6f-1185b6314e38)
 
 
