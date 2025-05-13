@@ -51,6 +51,28 @@ Built with modern web technologies and powered by the DeepSeek API for multi-lan
 
 ---
 
+## 👩‍💻 My Role
+
+As both **Project Manager** and **Developer**, I was responsible for:
+
+**Project Management**
+- Defined project scope, goals, and key deliverables
+- Planned and organized tasks using Agile methodology (Kanban-style board)
+- Coordinated frontend and backend integration
+- Managed sprint goals and feature timeline until deployment
+
+Example Project Timeline in Notion:
+![Project Planning](https://github.com/hasegawaren/assets/raw/main/sumify-planning.png)
+
+**Development Responsibilities**
+- Designed and developed the **entire frontend** using Next.js and Tailwind CSS
+- Built backend endpoints using **FastAPI (Python)** connected to DeepSeek API
+- Implemented multilingual summarization logic and AI-powered Q&A
+- Created responsive UI design using **Figma**
+- Deployed production version using **Vercel (Frontend)** and **Railway (Backend)**
+
+---
+
 ##  Getting Started
 
 ```bash
