@@ -51,7 +51,7 @@ Built with modern web technologies and powered by the DeepSeek API for multi-lan
 
 ---
 
-## 👩‍💻 My Role
+## My Role
 
 As both **Project Manager** and **Developer**, I was responsible for:
 
@@ -62,7 +62,7 @@ As both **Project Manager** and **Developer**, I was responsible for:
 - Managed sprint goals and feature timeline until deployment
 
 Example Project Timeline in Notion:
-![Project Planning](![image](https://github.com/user-attachments/assets/b59c49c6-b960-459c-a708-50fae64df7cb)
+![Project Planning](![image](https://github.com/user-attachments/assets/b59c49c6-b960-459c-a708-50fae64df7cb))
 
 **Development Responsibilities**
 - Designed and developed the **entire frontend** using Next.js and Tailwind CSS
