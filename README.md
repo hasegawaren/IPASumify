@@ -2,6 +2,7 @@
 
 A full-stack web app that summarizes content from PDFs, Wikipedia, or plain text, with support for **interactive Q&A** in both Thai and English.  
 Built with modern web technologies and powered by the DeepSeek API for multi-language summarization and intelligent follow-up.
+
 ![workflow](https://github.com/user-attachments/assets/c42d6b39-0984-4a0b-bddf-445b8afb6068)
 ---
 
